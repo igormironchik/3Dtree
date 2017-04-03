@@ -1,0 +1,12 @@
+
+/**/debug/
+/**/release/
+/lib/
+/**/Makefile*
+/**/*.o
+/**/*.user
+/**/moc_*.cpp
+/**/*.moc
+/**/ui_*.h
+/**/qrc_*.cpp
+/**/*.user*

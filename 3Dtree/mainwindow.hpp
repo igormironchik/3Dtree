@@ -20,24 +20,44 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef TREE__MAINWINDOW_HPP__INCLUDED
+#define TREE__MAINWINDOW_HPP__INCLUDED
+
 // Qt include.
-#include <QApplication>
-#include <Qt3DExtras/Qt3DWindow>
-
-// 3Dtree include.
-#include "mainwindow.hpp"
+#include <QWidget>
+#include <QScopedPointer>
+#include <Qt3DExtras/Qt3dWindow>
 
 
-int main( int argc, char ** argv )
+//
+// MainWindow
+//
+
+class MainWindowPrivate;
+
+//! Main window.
+class MainWindow Q_DECL_FINAL
+	:	public QWidget
 {
-	QApplication app( argc, argv );
+public:
+	explicit MainWindow( Qt3DExtras::Qt3DWindow * view );
+	~MainWindow();
 
-	Qt3DExtras::Qt3DWindow * view = new Qt3DExtras::Qt3DWindow;
+private slots:
+	//! Play/pause button clicked.
+	void buttonClicked();
+	//! Max years changed.
+	void yearsChanged( int years );
+	//! Timer.
+	void timer();
 
-	MainWindow w( view );
+private:
+	friend class MainWindowPrivate;
 
-	w.show();
+	Q_DISABLE_COPY( MainWindow )
 
-	return app.exec();
-}
+	QScopedPointer< MainWindowPrivate > d;
+}; // class MainWindow
 
+
+#endif // TREE__MAINWINDOW_HPP__INCLUDED

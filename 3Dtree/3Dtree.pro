@@ -8,9 +8,13 @@ QT += widgets core gui \
 
 HEADERS = branch.hpp \
 	leaf.hpp \
-	mainwindow.hpp
+	mainwindow.hpp \
+    leaf_geometry.hpp \
+    leaf_mesh.hpp
 
 SOURCES = branch.cpp \
 	leaf.hpp \
 	main.cpp \
-	mainwindow.cpp
+	mainwindow.cpp \
+    leaf_geometry.cpp \
+    leaf_mesh.cpp

@@ -19,3 +19,54 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#ifndef TREE__LEAF_HPP__INCLUDED
+#define TREE__LEAF_HPP__INCLUDED
+
+// Qt include.
+#include <Qt3DCore/QEntity>
+
+#include <QScopedPointer>
+#include <QColor>
+
+
+//
+// Leaf
+//
+
+class LeafPrivate;
+
+//! Leaf on the tree.
+class Leaf Q_DECL_FINAL
+	:	public Qt3DCore::QEntity
+{
+public:
+	Leaf( const QVector3D & startBranchPos,
+		const QVector3D & endBranchPos,
+		Qt3DCore::QNode * parent = Q_NULLPTR );
+	~Leaf();
+
+	//! Set color.
+	void setColor( const QColor & c );
+
+	//! Set age in range from 0.0 to 1.0.
+	void setAge( float age );
+
+	//! Update position of the leaf.
+	void updatePosition();
+
+	//! Rotate leaf. \note The leaf is rotated around the branch with
+	//! small random angle to the orthogonal plane to the branch.
+	//! \par angle is angle on the orthogonal to the branch plane with
+	//! center on the end of the branch.
+	void rotate( float angle );
+
+private:
+	friend class LeafPrivate;
+
+	Q_DISABLE_COPY( Leaf )
+
+	QScopedPointer< LeafPrivate > d;
+}; // class Leaf
+
+#endif // TREE__LEAF_HPP__INCLUDED

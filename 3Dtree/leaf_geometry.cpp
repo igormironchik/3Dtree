@@ -22,6 +22,7 @@
 
 // 3Dtree include.
 #include "leaf_geometry.hpp"
+#include "constants.hpp"
 
 // Qt include.
 #include <Qt3DRender/QAttribute>
@@ -89,7 +90,8 @@ QByteArray createLeafVertexData()
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
-	std::uniform_real_distribution< float > dis( -0.05f, 0.05f );
+	std::uniform_real_distribution< float > dis( c_negativeLeafDistortion,
+		c_positiveLeafDistortion );
 
 	// 0
 	// position

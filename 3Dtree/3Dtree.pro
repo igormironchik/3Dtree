@@ -10,10 +10,11 @@ HEADERS = branch.hpp \
 	leaf.hpp \
 	mainwindow.hpp \
     leaf_geometry.hpp \
-    leaf_mesh.hpp
+    leaf_mesh.hpp \
+    constants.hpp
 
 SOURCES = branch.cpp \
-	leaf.hpp \
+	leaf.cpp \
 	main.cpp \
 	mainwindow.cpp \
     leaf_geometry.cpp \

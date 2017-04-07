@@ -54,6 +54,7 @@ public:
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
 		,	m_startPos( 0.0f, 0.0f, 0.0f )
+		,	m_autumnHasCome( false )
 		,	q( parent )
 	{
 	}
@@ -85,6 +86,8 @@ public:
 	QList< Leaf* > m_leafs;
 	//! Child branches.
 	QList< Branch* > m_children;
+	//! Autumn has come.
+	bool m_autumnHasCome;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -222,21 +225,47 @@ Branch::setAge( float age )
 {
 	d->m_transform->setScale( age );
 
+	updatePosition();
+
 	if( age < 1.0f )
 	{
 		for( const auto & l : qAsConst( d->m_leafs ) )
 		{
+			// Spring.
+			if( age <= 0.25f )
+				l->setAge( age * 4.0f );
+			// Autumn.
+			else if( age > 0.5f && age <= 0.75f && !d->m_autumnHasCome )
+			{
+				std::random_device rd;
+				std::mt19937 gen( rd() );
+				std::uniform_real_distribution< float > dis( 0.0f, 1.0f );
 
-		}
-	}
-	else if( !d->m_leafs.isEmpty() )
-	{
-		for( const auto & l : qAsConst( d->m_leafs ) )
-		{
-			l->deleteLater();
+				static const float segmentLength = 1.0f;
+				const float pdist = dis( gen );
+				const float ratio = pdist / segmentLength;
+
+				static const QColor c1( Qt::yellow );
+				static const QColor c2( Qt::red );
+
+				const int red = (int)( ratio * c1.redF() +
+					( 1 - ratio ) * c2.redF() );
+				const int green = (int)( ratio * c1.greenF() +
+					( 1 - ratio ) * c2.greenF() );
+				const int blue = (int)( ratio * c1.blueF() +
+					( 1 - ratio ) * c2.blueF() );
+
+				l->setColor( QColor( red, green, blue ) );
+			}
+			// Winter.
+			else if( age > 0.75f )
+				l->deleteLater();
 		}
 
-		d->m_leafs.clear();
+		if( age > 0.5f && age <= 0.75f )
+			d->m_autumnHasCome = true;
+		else if( age > 0.75f )
+			d->m_leafs.clear();
 	}
 
 	if( !d->m_children.isEmpty() )
@@ -244,6 +273,8 @@ Branch::setAge( float age )
 		for( const auto & b : qAsConst( d->m_children ) )
 		{
 			b->setAge( age - 1.0f );
+
+			b->updatePosition();
 		}
 	}
 	else if( age >= 1.0f )
@@ -283,4 +314,11 @@ void
 Branch::updatePosition()
 {
 	d->m_transform->setTranslation( d->m_endParentPos );
+
+	const QVector3D end( 0.0f, d->m_mesh->length(), 0.0f );
+	const QVector3D start( 0.0f, 0.0f, 0.0f );
+
+	d->m_startPos = d->m_transform->matrix() * start;
+
+	d->m_endPos = d->m_transform->matrix() * end;
 }

@@ -42,12 +42,15 @@
 class BranchPrivate {
 public:
 	BranchPrivate( const QVector3D & startParentPos,
-		const QVector3D & endParentPos, Branch * parent )
+		const QVector3D & endParentPos,
+		float parentRadius, bool continuation, Branch * parent )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( Q_NULLPTR )
 		,	m_startParentPos( startParentPos )
 		,	m_endParentPos( endParentPos )
+		,	m_parentRadius( parentRadius )
+		,	m_continuation( continuation )
 		,	m_startPos( 0.0f, 0.0f, 0.0f )
 		,	q( parent )
 	{
@@ -55,6 +58,8 @@ public:
 
 	//! Init.
 	void init();
+	//! Place on top of parent and make parallel to the parent.
+	void placeOnTopAndParallel();
 
 	//! Mesh.
 	Qt3DExtras::QConeMesh * m_mesh;
@@ -66,6 +71,10 @@ public:
 	const QVector3D & m_startParentPos;
 	//! End parent pos.
 	const QVector3D & m_endParentPos;
+	//! Parent radius.
+	float m_parentRadius;
+	//! Is this branch a continuation of the parent?
+	bool m_continuation;
 	//! Start pos.
 	QVector3D m_startPos;
 	//! End pos.
@@ -81,14 +90,23 @@ BranchPrivate::init()
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
-	std::uniform_real_distribution< float > dis( 0.0f,
+	std::uniform_real_distribution< float > ldis( 0.0f,
 		c_branchLengthDistortion );
 
-	m_mesh->setBottomRadius( c_branchBottomRadius );
-	m_mesh->setTopRadius( c_branchTopRadius );
+	std::uniform_real_distribution< float > rdis( 0.0f, c_branchDistortion );
+
+	if( m_continuation )
+		m_mesh->setBottomRadius( m_parentRadius );
+	else
+		m_mesh->setBottomRadius( m_parentRadius - rdis( gen ) );
+
+	m_mesh->setTopRadius( m_mesh->bottomRadius() - c_branchRadiusDelta );
+
 	m_mesh->setHasBottomEndcap( true );
 	m_mesh->setHasTopEndcap( true );
-	m_mesh->setLength( c_branchLength + dis( gen ) );
+
+	m_mesh->setLength( c_branchLength + ldis( gen ) );
+
 	m_mesh->setRings( 20 );
 	m_mesh->setSlices( 10 );
 
@@ -109,29 +127,15 @@ BranchPrivate::init()
 	m_material->setDiffuse( Qt::darkGray );
 
 	q->addComponent( m_material );
-}
 
-
-//
-// Branch
-//
-
-Branch::Branch( const QVector3D & startParentPos,
-	const QVector3D & endParentPos, Qt3DCore::QNode * parent )
-	:	Qt3DCore::QEntity( parent )
-	,	d( new BranchPrivate( startParentPos, endParentPos, this ) )
-{
-	d->init();
-}
-
-Branch::~Branch()
-{
+	if( m_continuation )
+		placeOnTopAndParallel();
 }
 
 void
-Branch::placeOnTopAndParallel()
+BranchPrivate::placeOnTopAndParallel()
 {
-	const QVector3D parent = ( d->m_endParentPos - d->m_startParentPos )
+	const QVector3D parent = ( m_endParentPos - m_startParentPos )
 		.normalized();
 	const QVector3D b( 0.0f, 1.0f, 0.0f );
 
@@ -141,10 +145,29 @@ Branch::placeOnTopAndParallel()
 
 	const float angle = std::acos( cosAngle ) * c_degInRad;
 
-	d->m_transform->setRotation( Qt3DCore::QTransform::fromAxisAndAngle( axis,
+	m_transform->setRotation( Qt3DCore::QTransform::fromAxisAndAngle( axis,
 		angle ) );
 
-	updatePosition();
+	q->updatePosition();
+}
+
+
+//
+// Branch
+//
+
+Branch::Branch( const QVector3D & startParentPos,
+	const QVector3D & endParentPos,
+	float parentRadius, bool continuation, Qt3DCore::QNode * parent )
+	:	Qt3DCore::QEntity( parent )
+	,	d( new BranchPrivate( startParentPos, endParentPos,
+			parentRadius, continuation, this ) )
+{
+	d->init();
+}
+
+Branch::~Branch()
+{
 }
 
 void
@@ -176,7 +199,7 @@ Branch::rotate( float angle )
 void
 Branch::setAge( float age )
 {
-
+	d->m_transform->setScale( age );
 }
 
 void

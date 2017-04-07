@@ -33,10 +33,12 @@ static const float c_leafAngle = 35.0f;
 static const float c_negativeLeafDistortion = -0.05f;
 //! Positive value of leaf vertex distortion.
 static const float c_positiveLeafDistortion = 0.05f;
-//! Branch bottom radius.
-static const float c_branchBottomRadius = 0.1f;
-//! Branch top radius.
-static const float c_branchTopRadius = 0.09f;
+//! Distortion of the radius of branch.
+static const float c_branchDistortion = 0.07f;
+//! Delta of the branch radius.
+static const float c_branchRadiusDelta = 0.02f;
+//! Start branch radius.
+static const float c_startBranchRadius = 0.1f;
 //! Branch length.
 static const float c_branchLength = 0.35f;
 //! Distortion of the branch length.

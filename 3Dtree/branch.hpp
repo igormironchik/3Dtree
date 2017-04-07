@@ -41,11 +41,9 @@ class Branch Q_DECL_FINAL
 public:
 	Branch( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
+		float parentRadius, bool continuation,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Branch();
-
-	//! Place on top of parent and make parallel to the parent.
-	void placeOnTopAndParallel();
 
 	//! Rotate on top of the parent.
 	void rotate( float angle );

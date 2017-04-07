@@ -54,7 +54,6 @@ public:
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
 		,	m_startPos( 0.0f, 0.0f, 0.0f )
-		,	m_autumnHasCome( false )
 		,	q( parent )
 	{
 	}
@@ -83,11 +82,9 @@ public:
 	//! End pos.
 	QVector3D m_endPos;
 	//! Leafs.
-	QList< Leaf* > m_leafs;
+	QList< QPair< Leaf*, bool > > m_leafs;
 	//! Child branches.
 	QList< Branch* > m_children;
-	//! Autumn has come.
-	bool m_autumnHasCome;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -147,10 +144,11 @@ BranchPrivate::init()
 
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
-		m_leafs.push_back( new Leaf( m_startPos, m_endPos, q ) );
-		m_leafs.last()->rotate( startLeafAngle );
-		m_leafs.last()->updatePosition();
-		m_leafs.last()->setAge( 0.0f );
+		m_leafs.push_back( qMakePair( new Leaf( m_startPos, m_endPos, q ),
+			false ) );
+		m_leafs.last().first->rotate( startLeafAngle );
+		m_leafs.last().first->updatePosition();
+		m_leafs.last().first->setAge( 0.0f );
 
 		startLeafAngle += 360.0f / (float) c_leafsCount;
 	}
@@ -229,42 +227,54 @@ Branch::setAge( float age )
 
 	if( age < 1.0f )
 	{
-		for( const auto & l : qAsConst( d->m_leafs ) )
+		for( auto it = d->m_leafs.begin(), last = d->m_leafs.end();
+			it != last; ++it )
 		{
 			// Spring.
 			if( age <= 0.25f )
-				l->setAge( age * 4.0f );
+				(*it).first->setAge( age * 4.0f );
 			// Autumn.
-			else if( age > 0.5f && age <= 0.75f && !d->m_autumnHasCome )
+			else if( age > 0.5f && age <= 0.75f )
 			{
-				std::random_device rd;
-				std::mt19937 gen( rd() );
-				std::uniform_real_distribution< float > dis( 0.0f, 1.0f );
+				if( !(*it).second )
+				{
+					std::random_device rd;
+					std::mt19937 gen( rd() );
+					std::uniform_real_distribution< float > autumn( age,
+						0.75f );
 
-				static const float segmentLength = 1.0f;
-				const float pdist = dis( gen );
-				const float ratio = pdist / segmentLength;
+					if( autumn( gen ) > 0.63f )
+					{
+						static const float segmentLength = 1.0f;
 
-				static const QColor c1( Qt::yellow );
-				static const QColor c2( Qt::red );
+						std::uniform_real_distribution< float > dis( 0.0f,
+							segmentLength );
 
-				const int red = (int)( ratio * c1.redF() +
-					( 1 - ratio ) * c2.redF() );
-				const int green = (int)( ratio * c1.greenF() +
-					( 1 - ratio ) * c2.greenF() );
-				const int blue = (int)( ratio * c1.blueF() +
-					( 1 - ratio ) * c2.blueF() );
+						const float pdist = dis( gen );
+						const float ratio = pdist / segmentLength;
 
-				l->setColor( QColor( red, green, blue ) );
+						static const QColor c1( Qt::yellow );
+						static const QColor c2( Qt::red );
+
+						const int red = (int)( ratio * c1.redF() +
+							( 1 - ratio ) * c2.redF() );
+						const int green = (int)( ratio * c1.greenF() +
+							( 1 - ratio ) * c2.greenF() );
+						const int blue = (int)( ratio * c1.blueF() +
+							( 1 - ratio ) * c2.blueF() );
+
+						(*it).first->setColor( QColor( red, green, blue ) );
+
+						(*it).second = true;
+					}
+				}
 			}
 			// Winter.
 			else if( age > 0.75f )
-				l->deleteLater();
+				(*it).first->deleteLater();
 		}
 
-		if( age > 0.5f && age <= 0.75f )
-			d->m_autumnHasCome = true;
-		else if( age > 0.75f )
+		if( age > 0.75f )
 			d->m_leafs.clear();
 	}
 

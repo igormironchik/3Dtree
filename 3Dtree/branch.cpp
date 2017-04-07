@@ -221,7 +221,18 @@ Branch::rotate( float angle )
 void
 Branch::setAge( float age )
 {
-	d->m_transform->setScale( age );
+	float tmp = age;
+	float i = 0.0f;
+
+	for( ; tmp >= 1.0f; tmp -= 1.0f )
+		i += 1.0f;
+
+	if( tmp <= 0.5f )
+		tmp *= 2.0f;
+	else
+		tmp = 1.0f;
+
+	d->m_transform->setScale( i + tmp );
 
 	updatePosition();
 

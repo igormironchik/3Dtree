@@ -22,6 +22,8 @@
 
 // 3Dtree include.
 #include "mainwindow.hpp"
+#include "branch.hpp"
+#include "constants.hpp"
 
 // Qt include.
 #include <QPushButton>
@@ -31,6 +33,12 @@
 #include <QSpacerItem>
 #include <QLabel>
 #include <QTimer>
+#include <QApplication>
+
+#include <Qt3DCore/QEntity>
+#include <Qt3DRender/QCamera>
+#include <Qt3DRender/QPointLight>
+#include <Qt3DCore/QTransform>
 
 
 //
@@ -40,7 +48,10 @@
 class MainWindowPrivate {
 public:
 	MainWindowPrivate( MainWindow * parent )
-		:	m_years( Q_NULLPTR )
+		:	m_tree( Q_NULLPTR )
+		,	m_startPos( 0.0f, -0.5f, 0.0f )
+		,	m_endPos( 0.0f, 0.0f, 0.0f )
+		,	m_years( Q_NULLPTR )
 		,	m_btn( Q_NULLPTR )
 		,	m_timer( Q_NULLPTR )
 		,	m_playing( true )
@@ -50,7 +61,15 @@ public:
 
 	//! Init.
 	void init( Qt3DExtras::Qt3DWindow * view );
+	//! Init 3D.
+	void init3D( Qt3DExtras::Qt3DWindow * view );
 
+	//! Tree.
+	Branch * m_tree;
+	//! Start tree pos.
+	QVector3D m_startPos;
+	//! End tree pos.
+	QVector3D m_endPos;
 	//! Years.
 	QSpinBox * m_years;
 	//! Pause/play button.
@@ -108,6 +127,47 @@ MainWindowPrivate::init( Qt3DExtras::Qt3DWindow * view )
 		q, &MainWindow::buttonClicked );
 	MainWindow::connect( m_timer, &QTimer::timeout,
 		q, &MainWindow::timer );
+
+	init3D( view );
+}
+
+static Qt3DCore::QEntity * rootEntity = Q_NULLPTR;
+
+static void cleanRootEntity()
+{
+	delete rootEntity;
+}
+
+void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
+{
+	qAddPostRoutine( cleanRootEntity );
+
+	// Root entity
+	rootEntity = new Qt3DCore::QEntity;
+
+	// Camera
+	Qt3DRender::QCamera * cameraEntity = view->camera();
+
+	cameraEntity->lens()->setPerspectiveProjection(
+		45.0f, 16.0f / 9.0f, 0.1f, 1000.0f );
+	cameraEntity->setPosition( QVector3D( 0.0f, 0.0f, 20.0f ) );
+	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
+	cameraEntity->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
+
+	Qt3DCore::QEntity * lightEntity = new Qt3DCore::QEntity( rootEntity );
+
+	Qt3DRender::QPointLight * light = new Qt3DRender::QPointLight( lightEntity );
+	light->setColor( Qt::white );
+	light->setIntensity( 1.0f );
+	lightEntity->addComponent( light );
+
+	Qt3DCore::QTransform * lightTransform = new Qt3DCore::QTransform(
+		lightEntity );
+	lightTransform->setTranslation( cameraEntity->position() );
+	lightEntity->addComponent( lightTransform );
+
+	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
+		true, rootEntity );
 }
 
 

@@ -19,3 +19,49 @@
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#ifndef TREE__BRANCH_HPP__INCLUDED
+#define TREE__BRANCH_HPP__INCLUDED
+
+// Qt include.
+#include <Qt3DCore/QEntity>
+#include <QScopedPointer>
+
+
+//
+// Branch
+//
+
+class BranchPrivate;
+
+//! Branch on the tree.
+class Branch Q_DECL_FINAL
+	:	public Qt3DCore::QEntity
+{
+public:
+	Branch( const QVector3D & startParentPos,
+		const QVector3D & endParentPos,
+		Qt3DCore::QNode * parent = Q_NULLPTR );
+	~Branch();
+
+	//! Place on top of parent and make parallel to the parent.
+	void placeOnTopAndParallel();
+
+	//! Rotate on top of the parent.
+	void rotate( float angle );
+
+	//! Set age of the branch. 1.0f = 1 year, 2.0f = 2 years, and so on.
+	void setAge( float age );
+
+	//! Update position.
+	void updatePosition();
+
+private:
+	friend class BranchPrivate;
+
+	Q_DISABLE_COPY( Branch )
+
+	QScopedPointer< BranchPrivate > d;
+}; // class Branch
+
+#endif // TREE__BRANCH_HPP__INCLUDED

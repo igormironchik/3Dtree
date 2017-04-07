@@ -33,5 +33,15 @@ static const float c_leafAngle = 35.0f;
 static const float c_negativeLeafDistortion = -0.05f;
 //! Positive value of leaf vertex distortion.
 static const float c_positiveLeafDistortion = 0.05f;
+//! Branch bottom radius.
+static const float c_branchBottomRadius = 0.1f;
+//! Branch top radius.
+static const float c_branchTopRadius = 0.09f;
+//! Branch length.
+static const float c_branchLength = 0.35f;
+//! Distortion of the branch length.
+static const float c_branchLengthDistortion = 0.2f;
+//! Max angle of the child branch.
+static const float c_maxBranchAngle = 35.0f;
 
 #endif // TREE__CONSTANTS_HPP__INCLUDED

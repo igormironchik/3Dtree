@@ -30,6 +30,8 @@
 #include <Qt3DExtras/QConeMesh>
 #include <Qt3DExtras/QPhongMaterial>
 
+#include <QList>
+
 // C++ include.
 #include <random>
 #include <cmath>
@@ -79,6 +81,10 @@ public:
 	QVector3D m_startPos;
 	//! End pos.
 	QVector3D m_endPos;
+	//! Leafs.
+	QList< Leaf* > m_leafs;
+	//! Child branches.
+	QList< Branch* > m_children;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -130,6 +136,21 @@ BranchPrivate::init()
 
 	if( m_continuation )
 		placeOnTopAndParallel();
+
+	std::uniform_real_distribution< float > rotdis( 0.0f,
+		c_leafRotationDistortion );
+
+	float startLeafAngle = rotdis( gen );
+
+	for( quint8 i = 0; i < c_leafsCount; ++i )
+	{
+		m_leafs.push_back( new Leaf( m_startPos, m_endPos, q ) );
+		m_leafs.last()->rotate( startLeafAngle );
+		m_leafs.last()->updatePosition();
+		m_leafs.last()->setAge( 0.0f );
+
+		startLeafAngle += 360.0f / (float) c_leafsCount;
+	}
 }
 
 void
@@ -200,6 +221,62 @@ void
 Branch::setAge( float age )
 {
 	d->m_transform->setScale( age );
+
+	if( age < 1.0f )
+	{
+		for( const auto & l : qAsConst( d->m_leafs ) )
+		{
+
+		}
+	}
+	else if( !d->m_leafs.isEmpty() )
+	{
+		for( const auto & l : qAsConst( d->m_leafs ) )
+		{
+			l->deleteLater();
+		}
+
+		d->m_leafs.clear();
+	}
+
+	if( !d->m_children.isEmpty() )
+	{
+		for( const auto & b : qAsConst( d->m_children ) )
+		{
+			b->setAge( age - 1.0f );
+		}
+	}
+	else if( age >= 1.0f )
+	{
+		if( c_hasContinuationBranch )
+		{
+			d->m_children.push_back( new Branch( d->m_startPos,
+				d->m_endPos, d->m_mesh->topRadius(), true, this ) );
+			d->m_children.last()->updatePosition();
+			d->m_children.last()->setAge( 0.0f );
+		}
+
+		const quint8 count = c_childBranchesCount -
+			( c_hasContinuationBranch ? 1 : 0 );
+
+		std::random_device rd;
+		std::mt19937 gen( rd() );
+		std::uniform_real_distribution< float > dis( 0.0f,
+			c_branchRotationDistortion );
+
+		float angle = dis( gen );
+
+		for( quint8 i = 0; i < count; ++i )
+		{
+			d->m_children.push_back( new Branch( d->m_startPos,
+				d->m_endPos, d->m_mesh->topRadius(), false, this ) );
+			d->m_children.last()->rotate( angle );
+			d->m_children.last()->updatePosition();
+			d->m_children.last()->setAge( 0.0f );
+
+			angle += 360.0f / (float) count;
+		}
+	}
 }
 
 void

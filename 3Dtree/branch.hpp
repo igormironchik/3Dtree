@@ -54,6 +54,10 @@ public:
 	//! Update position.
 	void updatePosition();
 
+protected:
+	//! Place leafs.
+	void placeLeafs();
+
 private:
 	friend class BranchPrivate;
 

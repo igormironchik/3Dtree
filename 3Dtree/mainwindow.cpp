@@ -25,6 +25,8 @@
 #include "branch.hpp"
 #include "constants.hpp"
 
+#include "leaf.hpp"
+
 // Qt include.
 #include <QPushButton>
 #include <QSpinBox>
@@ -33,13 +35,15 @@
 #include <QSpacerItem>
 #include <QLabel>
 #include <QTimer>
-#include <QApplication>
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QPointLight>
 #include <Qt3DCore/QTransform>
 
+
+//! Grow timer in milliseconds.
+static const int c_growTimer = 1000;
 
 //
 // MainWindowPrivate
@@ -49,12 +53,16 @@ class MainWindowPrivate {
 public:
 	MainWindowPrivate( MainWindow * parent )
 		:	m_tree( Q_NULLPTR )
+		,	m_growSpeed( 1.0f / 60.0f / ( 1000.0f / (float) c_growTimer ) )
+		,	m_currentAge( 0.0f )
 		,	m_startPos( 0.0f, -0.5f, 0.0f )
 		,	m_endPos( 0.0f, 0.0f, 0.0f )
 		,	m_years( Q_NULLPTR )
 		,	m_btn( Q_NULLPTR )
 		,	m_timer( Q_NULLPTR )
 		,	m_playing( true )
+		,	m_grown( false )
+		,	m_rootEntity( Q_NULLPTR )
 		,	q( parent )
 	{
 	}
@@ -63,9 +71,15 @@ public:
 	void init( Qt3DExtras::Qt3DWindow * view );
 	//! Init 3D.
 	void init3D( Qt3DExtras::Qt3DWindow * view );
+	//! Create tree.
+	void createTree();
 
 	//! Tree.
 	Branch * m_tree;
+	//! Grow speed.
+	float m_growSpeed;
+	//! Current age.
+	float m_currentAge;
 	//! Start tree pos.
 	QVector3D m_startPos;
 	//! End tree pos.
@@ -78,6 +92,10 @@ public:
 	QTimer * m_timer;
 	//! Playing?
 	bool m_playing;
+	//! Tree grown.
+	bool m_grown;
+	//! Root entity.
+	Qt3DCore::QEntity * m_rootEntity;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -104,7 +122,7 @@ MainWindowPrivate::init( Qt3DExtras::Qt3DWindow * view )
 	m_years = new QSpinBox( q );
 	m_years->setMinimum( 1 );
 	m_years->setMaximum( 99 );
-	m_years->setValue( 30 );
+	m_years->setValue( 3 );
 	l1->addWidget( m_years );
 
 	m_btn = new QPushButton( MainWindow::tr( "Pause" ), q );
@@ -116,13 +134,9 @@ MainWindowPrivate::init( Qt3DExtras::Qt3DWindow * view )
 	v->addItem( s );
 
 	m_timer = new QTimer( q );
-	m_timer->setInterval( 1000 );
+	m_timer->setInterval( c_growTimer );
 	m_timer->start();
 
-	void ( QSpinBox::*signal )( int ) = &QSpinBox::valueChanged;
-
-	MainWindow::connect( m_years, signal,
-		q, &MainWindow::yearsChanged );
 	MainWindow::connect( m_btn, &QPushButton::clicked,
 		q, &MainWindow::buttonClicked );
 	MainWindow::connect( m_timer, &QTimer::timeout,
@@ -131,19 +145,10 @@ MainWindowPrivate::init( Qt3DExtras::Qt3DWindow * view )
 	init3D( view );
 }
 
-static Qt3DCore::QEntity * rootEntity = Q_NULLPTR;
-
-static void cleanRootEntity()
-{
-	delete rootEntity;
-}
-
 void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 {
-	qAddPostRoutine( cleanRootEntity );
-
 	// Root entity
-	rootEntity = new Qt3DCore::QEntity;
+	m_rootEntity = new Qt3DCore::QEntity;
 
 	// Camera
 	Qt3DRender::QCamera * cameraEntity = view->camera();
@@ -154,7 +159,7 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 	cameraEntity->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
 
-	Qt3DCore::QEntity * lightEntity = new Qt3DCore::QEntity( rootEntity );
+	Qt3DCore::QEntity * lightEntity = new Qt3DCore::QEntity( m_rootEntity );
 
 	Qt3DRender::QPointLight * light = new Qt3DRender::QPointLight( lightEntity );
 	light->setColor( Qt::white );
@@ -166,8 +171,21 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	lightTransform->setTranslation( cameraEntity->position() );
 	lightEntity->addComponent( lightTransform );
 
+	createTree();
+
+	view->setRootEntity( m_rootEntity );
+}
+
+void
+MainWindowPrivate::createTree()
+{
+	if( m_tree )
+		m_tree->deleteLater();
+
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
-		true, rootEntity );
+		true, m_rootEntity );
+
+	m_tree->setAge( 0.0f );
 }
 
 
@@ -188,7 +206,19 @@ MainWindow::~MainWindow()
 void
 MainWindow::buttonClicked()
 {
-	if( d->m_playing )
+	if( d->m_grown )
+	{
+		d->m_playing = true;
+
+		d->m_btn->setText( tr( "Pause" ) );
+
+		d->m_currentAge = 0.0f;
+
+		d->createTree();
+
+		d->m_timer->start();
+	}
+	else if( d->m_playing )
 	{
 		d->m_playing = false;
 
@@ -207,13 +237,20 @@ MainWindow::buttonClicked()
 }
 
 void
-MainWindow::yearsChanged( int years )
-{
-
-}
-
-void
 MainWindow::timer()
 {
+	d->m_currentAge += d->m_growSpeed;
 
+	if( d->m_currentAge > (float) d->m_years->value() - 0.5f )
+	{
+		d->m_timer->stop();
+
+		d->m_grown = true;
+
+		d->m_btn->setText( tr( "Restart" ) );
+
+		d->m_playing = false;
+	}
+	else
+		d->m_tree->setAge( d->m_currentAge );
 }

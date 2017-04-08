@@ -42,14 +42,14 @@ public:
 	~LeafMesh();
 
 private:
-	void setInstanceCount( int instanceCount );
-	void setVertexCount( int vertexCount );
-	void setIndexOffset( int indexOffset );
-	void setFirstInstance( int firstInstance );
-	void setRestartIndexValue( int index );
-	void setPrimitiveRestartEnabled( bool enabled );
-	void setGeometry( Qt3DRender::QGeometry * geometry );
-	void setPrimitiveType( PrimitiveType primitiveType );
+//	void setInstanceCount( int instanceCount );
+//	void setVertexCount( int vertexCount );
+//	void setIndexOffset( int indexOffset );
+//	void setFirstInstance( int firstInstance );
+//	void setRestartIndexValue( int index );
+//	void setPrimitiveRestartEnabled( bool enabled );
+//	void setGeometry( Qt3DRender::QGeometry * geometry );
+//	void setPrimitiveType( PrimitiveType primitiveType );
 };
 
 #endif // TREE_LEAF_MESH_HPP__INCLUDED

@@ -45,9 +45,6 @@ public:
 	//! \return Position attribute.
 	Qt3DRender::QAttribute * positionAttribute() const;
 
-	//! \return Texture coordinates attribute.
-	Qt3DRender::QAttribute * texCoordAttribute() const;
-
 	//! \return Normals attribute.
 	Qt3DRender::QAttribute * normalsAttribute() const;
 

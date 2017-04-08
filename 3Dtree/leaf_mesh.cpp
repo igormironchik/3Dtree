@@ -32,11 +32,31 @@
 LeafMesh::LeafMesh( Qt3DCore::QNode * parent )
 	:	Qt3DRender::QGeometryRenderer( parent )
 {
+	setPrimitiveType( Qt3DRender::QGeometryRenderer::Triangles );
+	setInstanceCount(1);
+    setIndexOffset(0);
+    setFirstInstance(0);
+    setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
+
 	LeafGeometry * geometry = new LeafGeometry( this );
 
 	QGeometryRenderer::setGeometry( geometry );
+
+	//setVertexCount( 3 );
 }
 
 LeafMesh::~LeafMesh()
 {
 }
+
+//void
+//LeafMesh::setPrimitiveType( PrimitiveType primitiveType )
+//{
+//	Qt3DRender::QGeometryRenderer::setPrimitiveType( primitiveType );
+//}
+
+//void
+//LeafMesh::setVertexCount( int vertexCount )
+//{
+//	Qt3DRender::QGeometryRenderer::setVertexCount( vertexCount );
+//}

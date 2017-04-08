@@ -33,6 +33,7 @@
 #include <cmath>
 #include <random>
 
+
 using namespace Qt3DExtras;
 
 
@@ -79,7 +80,9 @@ LeafPrivate::init()
 
 	m_material = new QPhongMaterial( q );
 
+	m_material->setAmbient( Qt::darkGreen );
 	m_material->setDiffuse( Qt::darkGreen );
+	m_material->setSpecular( Qt::darkGreen );
 
 	q->addComponent( m_material );
 
@@ -88,8 +91,6 @@ LeafPrivate::init()
 	m_transform->setTranslation( m_endBranchPos );
 
 	q->addComponent( m_transform );
-
-	q->rotate( 0.0f );
 }
 
 
@@ -112,7 +113,9 @@ Leaf::~Leaf()
 void
 Leaf::setColor( const QColor & c )
 {
+	d->m_material->setAmbient( c );
 	d->m_material->setDiffuse( c );
+	d->m_material->setSpecular( c );
 }
 
 void
@@ -139,7 +142,10 @@ Leaf::rotate( float angle )
 		d->m_startBranchPos ).normalized();
 	const QVector3D leaf( 0.0f, 1.0f, 0.0f );
 
-	const QVector3D axis = QVector3D::crossProduct( branch, leaf );
+	QVector3D axis = QVector3D::crossProduct( branch, leaf );
+
+	if( axis.isNull() )
+		axis = QVector3D(  1.0f, 0.0f, 0.0f );
 
 	const float cosPlainAngle = QVector3D::dotProduct( branch, leaf );
 
@@ -147,13 +153,11 @@ Leaf::rotate( float angle )
 	std::mt19937 gen( rd() );
 	std::uniform_real_distribution< float > dis( 0.0f, c_leafAngle );
 
-	const float plainAngle = std::acos( cosPlainAngle ) * c_degInRad +
+	const float plainAngle = std::acos( cosPlainAngle ) * c_degInRad -
 		dis( gen );
 
-	QQuaternion quat = Qt3DCore::QTransform::fromAxisAndAngle( axis,
-		plainAngle );
-
-	quat += Qt3DCore::QTransform::fromAxisAndAngle( branch, angle );
+	const QQuaternion quat = Qt3DCore::QTransform::fromAxesAndAngles(
+		axis, plainAngle, branch, angle );
 
 	d->m_transform->setRotation( quat );
 }

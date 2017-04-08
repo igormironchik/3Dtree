@@ -46,8 +46,6 @@ public:
 private slots:
 	//! Play/pause button clicked.
 	void buttonClicked();
-	//! Max years changed.
-	void yearsChanged( int years );
 	//! Timer.
 	void timer();
 

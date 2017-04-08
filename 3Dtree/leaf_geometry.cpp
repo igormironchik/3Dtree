@@ -39,8 +39,8 @@ namespace /* anonymous */ {
 
 //! Number of vertexes.
 static const int c_vertsNumber = 9;
-//! Size of element - vec3 pos, vec2 texCoord, vec3 normal.
-static const quint32 c_elementSize = 3 + 2 + 3;
+//! Size of element - vec3 pos, vec3 normal.
+static const quint32 c_elementSize = 3 + 3;
 //! Stride.
 static const quint32 c_stride = c_elementSize * sizeof( float );
 //! Faces number.
@@ -54,25 +54,23 @@ static const int c_indices = c_faces * 3;
 //
 
 //! Init normal.
-void initNormal( float * fptr )
+void initNormal( float* & fptr )
 {
 	*fptr++ = 0.0f;
-	*fptr++ = 1.0f;
 	*fptr++ = 0.0f;
+	*fptr++ = 1.0f;
 } // initNormal
 
 /*
-	  v
-	  |     |
-	  |   0 *------------z
-	  |1 *  |2 *
-	  |     |
-	3 *   4 *   5 *
-	  |     |
-	  |6 *  |7 *
-	   ---8-*------------u
+	      0 *------------x
+	   1 *  |2 *
 	        |
-	        x
+	3 *   4 *   5 *
+	        |
+	   6 *  |7 *
+	      8 *
+	        |
+	        z
 */
 
 
@@ -84,7 +82,7 @@ void initNormal( float * fptr )
 QByteArray createLeafVertexData()
 {
 	QByteArray bufferBytes;
-	bufferBytes.resize( c_stride * c_vertsNumber );
+	bufferBytes.resize( c_elementSize * c_vertsNumber * sizeof( float ) );
 
 	float * fptr = reinterpret_cast< float* > ( bufferBytes.data() );
 
@@ -94,93 +92,64 @@ QByteArray createLeafVertexData()
 		c_positiveLeafDistortion );
 
 	// 0
-	// position
 	*fptr++ = 0.0f;
 	*fptr++ = 0.0f;
 	*fptr++ = 0.0f;
-
-	// texture coordinates
-	*fptr++ = 0.5f;
-	*fptr++ = 1.0f;
 
 	initNormal( fptr );
 
 	// 1
-	*fptr++ = 0.17f + dis( gen );
+	*fptr++ = -0.25f + dis( gen );
+	*fptr++ = 0.25f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = -0.17f + dis( gen );
-
-	*fptr++ = 0.25f;
-	*fptr++ = 0.83f;
 
 	initNormal( fptr );
 
 	// 2
-	*fptr++ = 0.17f + dis( gen );
+	*fptr++ = 0.25f + dis( gen );
+	*fptr++ = 0.25f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = 0.17f + dis( gen );
-
-	*fptr++ = 0.75f;
-	*fptr++ = 0.83f;
 
 	initNormal( fptr );
 
 	// 3
-	*fptr++ = 0.5f + dis( gen );
+	*fptr++ = -0.5f + dis( gen );
+	*fptr++ = 0.75f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = -0.33f + dis( gen );
-
-	*fptr++ = 0.0f;
-	*fptr++ = 0.5f;
 
 	initNormal( fptr );
 
 	// 4
-	*fptr++ = 0.5f;
 	*fptr++ = 0.0f;
+	*fptr++ = 0.75f;
 	*fptr++ = 0.0f;
-
-	*fptr++ = 0.5f;
-	*fptr++ = 0.5f;
 
 	initNormal( fptr );
 
 	// 5
 	*fptr++ = 0.5f + dis( gen );
+	*fptr++ = 0.75f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = 0.33f + dis( gen );
-
-	*fptr++ = 1.0f;
-	*fptr++ = 0.5f;
 
 	initNormal( fptr );
 
 	// 6
-	*fptr++ = 0.83f + dis( gen );
+	*fptr++ = -0.25f + dis( gen );
+	*fptr++ = 1.25f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = -0.17f + dis( gen );
-
-	*fptr++ = 0.25f;
-	*fptr++ = 0.17f;
 
 	initNormal( fptr );
 
 	// 7
-	*fptr++ = 0.83f + dis( gen );
+	*fptr++ = 0.25f + dis( gen );
+	*fptr++ = 1.25f + dis( gen );
 	*fptr++ = 0.0f;
-	*fptr++ = 0.17f + dis( gen );
-
-	*fptr++ = 0.75f;
-	*fptr++ = 0.17f;
 
 	initNormal( fptr );
 
 	// 8
-	*fptr++ = 1.0f + dis( gen );
-	*fptr++ = 0.0f;
 	*fptr++ = 0.0f + dis( gen );
-
-	*fptr++ = 0.5f;
+	*fptr++ = 1.5f + dis( gen );
 	*fptr++ = 0.0f;
 
 	initNormal( fptr );
@@ -200,44 +169,36 @@ QByteArray createLeafIndexData()
 	indexBytes.resize( c_indices * sizeof( quint16 ) );
 	quint16 * indexPtr = reinterpret_cast< quint16* > ( indexBytes.data() );
 
-	// 1
-	*indexPtr++ = 0;
-	*indexPtr++ = 1;
-	*indexPtr++ = 4;
-
-	// 2
 	*indexPtr++ = 0;
 	*indexPtr++ = 2;
 	*indexPtr++ = 4;
 
-	// 3
 	*indexPtr++ = 2;
 	*indexPtr++ = 5;
 	*indexPtr++ = 4;
 
-	// 4
 	*indexPtr++ = 5;
 	*indexPtr++ = 7;
 	*indexPtr++ = 4;
 
-	// 5
 	*indexPtr++ = 7;
 	*indexPtr++ = 8;
 	*indexPtr++ = 4;
 
-	// 6
 	*indexPtr++ = 8;
 	*indexPtr++ = 6;
 	*indexPtr++ = 4;
 
-	// 7
 	*indexPtr++ = 6;
 	*indexPtr++ = 3;
 	*indexPtr++ = 4;
 
-	// 8
 	*indexPtr++ = 3;
 	*indexPtr++ = 1;
+	*indexPtr++ = 4;
+
+	*indexPtr++ = 1;
+	*indexPtr++ = 0;
 	*indexPtr++ = 4;
 
 	return indexBytes;
@@ -328,7 +289,6 @@ class LeafGeometryPrivate {
 public:
 	LeafGeometryPrivate( LeafGeometry * parent )
 		:	m_positionsAttr( Q_NULLPTR )
-		,	m_texCoordAttr( Q_NULLPTR )
 		,	m_normalsAttr( Q_NULLPTR )
 		,	m_indexAttribute( Q_NULLPTR )
 		,	m_vertexBuffer( Q_NULLPTR )
@@ -342,8 +302,6 @@ public:
 
 	//! Positions attribute.
 	QAttribute * m_positionsAttr;
-	//! Texture coordinates attribute.
-	QAttribute * m_texCoordAttr;
 	//! Normals attribute.
 	QAttribute * m_normalsAttr;
 	//! Index attribute.
@@ -361,7 +319,6 @@ LeafGeometryPrivate::init()
 {
 	m_positionsAttr = new QAttribute( q );
 	m_normalsAttr = new QAttribute( q );
-	m_texCoordAttr = new QAttribute( q );
 	m_indexAttribute = new QAttribute( q );
 	m_vertexBuffer = new Qt3DRender::QBuffer( Qt3DRender::QBuffer::VertexBuffer,
 		q );
@@ -375,15 +332,7 @@ LeafGeometryPrivate::init()
 	m_positionsAttr->setBuffer( m_vertexBuffer );
 	m_positionsAttr->setByteStride( c_stride );
 	m_positionsAttr->setCount( c_vertsNumber );
-
-	m_texCoordAttr->setName( QAttribute::defaultTextureCoordinateAttributeName() );
-	m_texCoordAttr->setVertexBaseType( QAttribute::Float );
-	m_texCoordAttr->setVertexSize( 2 );
-	m_texCoordAttr->setAttributeType( QAttribute::VertexAttribute );
-	m_texCoordAttr->setBuffer( m_vertexBuffer );
-	m_texCoordAttr->setByteStride( c_stride );
-	m_texCoordAttr->setByteOffset( 3 * sizeof( float ) );
-	m_texCoordAttr->setCount( c_vertsNumber );
+	m_positionsAttr->setByteOffset( 0 );
 
 	m_normalsAttr->setName( QAttribute::defaultNormalAttributeName() );
 	m_normalsAttr->setVertexBaseType( QAttribute::Float );
@@ -391,7 +340,7 @@ LeafGeometryPrivate::init()
 	m_normalsAttr->setAttributeType( QAttribute::VertexAttribute );
 	m_normalsAttr->setBuffer( m_vertexBuffer );
 	m_normalsAttr->setByteStride( c_stride );
-	m_normalsAttr->setByteOffset( 5 * sizeof( float ) );
+	m_normalsAttr->setByteOffset( 3 * sizeof( float ) );
 	m_normalsAttr->setCount( c_vertsNumber );
 
 	m_indexAttribute->setAttributeType( QAttribute::IndexAttribute );
@@ -405,7 +354,6 @@ LeafGeometryPrivate::init()
 		QSharedPointer< LeafIndexBufferFunctor >::create() );
 
 	q->addAttribute( m_positionsAttr );
-	q->addAttribute( m_texCoordAttr );
 	q->addAttribute( m_normalsAttr );
 	q->addAttribute( m_indexAttribute );
 }
@@ -426,12 +374,6 @@ Qt3DRender::QAttribute *
 LeafGeometry::positionAttribute() const
 {
 	return d->m_positionsAttr;
-}
-
-Qt3DRender::QAttribute *
-LeafGeometry::texCoordAttribute() const
-{
-	return d->m_texCoordAttr;
 }
 
 Qt3DRender::QAttribute *

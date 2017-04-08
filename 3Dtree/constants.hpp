@@ -27,36 +27,48 @@
 #include <QtGlobal>
 
 
-//! Base scale for the leaf, i.e. when age is 1.0.
-static const float c_leafBaseScale = 0.1f;
 //! Degries in radian.
 static const float c_degInRad = 57.2958f;
+
+
+//
+// Leaf constants.
+//
+
+//! Base scale for the leaf, i.e. when age is 1.0.
+static const float c_leafBaseScale = 0.5f;
 //! Base angle for the leaf plain to the orthogonal plain of the branch.
-static const float c_leafAngle = 35.0f;
+static const float c_leafAngle = 90.0f;
 //! Leaf rotation distortion.
 static const float c_leafRotationDistortion = 50.0f;
-//! Negative value of leaf vertex distortion.
-static const float c_negativeLeafDistortion = -0.05f;
 //! Positive value of leaf vertex distortion.
 static const float c_positiveLeafDistortion = 0.05f;
+//! Negative value of leaf vertex distortion.
+static const float c_negativeLeafDistortion = - c_positiveLeafDistortion;
+//! Count of leafs.
+static const quint8 c_leafsCount = 2;
+
+
+//
+// Branch constants.
+//
+
 //! Distortion of the radius of branch.
-static const float c_branchDistortion = 0.07f;
+static const float c_branchDistortion = 0.005f;
 //! Delta of the branch radius.
-static const float c_branchRadiusDelta = 0.02f;
+static const float c_branchRadiusDelta = 0.003f;
 //! Start branch radius.
-static const float c_startBranchRadius = 0.1f;
+static const float c_startBranchRadius = 0.015f;
 //! Branch length.
-static const float c_branchLength = 0.35f;
+static const float c_branchLength = 0.25f;
 //! Distortion of the branch length.
-static const float c_branchLengthDistortion = 0.2f;
+static const float c_branchLengthDistortion = 0.1f;
 //! Max angle of the child branch.
 static const float c_maxBranchAngle = 35.0f;
 //! Count of child branches.
 static const quint8 c_childBranchesCount = 4;
 //! Should branch has continuation (parallel to parent) branch?
 static const bool c_hasContinuationBranch = true;
-//! Count of leafs.
-static const quint8 c_leafsCount = 2;
 //! Rotation of the branch distortion.
 static const float c_branchRotationDistortion = 35.0f;
 

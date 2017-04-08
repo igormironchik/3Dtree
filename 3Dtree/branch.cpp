@@ -124,7 +124,7 @@ BranchPrivate::init()
 
 	m_startPos = m_endParentPos;
 
-	m_endPos = m_startPos + QVector3D( 0.0f, c_branchLength, 0.0f );
+	m_endPos = m_startPos + QVector3D( 0.0f, m_mesh->length(), 0.0f );
 
 	q->addComponent( m_transform );
 
@@ -199,7 +199,10 @@ Branch::rotate( float angle )
 		.normalized();
 	const QVector3D b( 0.0f, 1.0f, 0.0f );
 
-	const QVector3D axis = QVector3D::crossProduct( parent, b );
+	QVector3D axis = QVector3D::crossProduct( parent, b );
+
+	if( axis.isNull() )
+		axis = QVector3D( 1.0f, 0.0f, 0.0f );
 
 	const float cosAngle = QVector3D::dotProduct( parent, b );
 
@@ -210,10 +213,8 @@ Branch::rotate( float angle )
 	const float plainAngle = std::acos( cosAngle ) * c_degInRad
 		+ dis( gen ) - 90.0f;
 
-	QQuaternion q = Qt3DCore::QTransform::fromAxisAndAngle( axis,
-		plainAngle );
-
-	q += Qt3DCore::QTransform::fromAxisAndAngle( parent, angle );
+	const QQuaternion q = Qt3DCore::QTransform::fromAxesAndAngles( axis,
+		plainAngle, parent, angle );
 
 	d->m_transform->setRotation( q );
 }
@@ -243,7 +244,12 @@ Branch::setAge( float age )
 		{
 			// Spring.
 			if( age <= 0.25f )
+			{
 				(*it).first->setAge( age * 4.0f );
+				(*it).first->updatePosition();
+			}
+			else if( age > 0.25f && age <= 0.5f )
+				(*it).first->updatePosition();
 			// Autumn.
 			else if( age > 0.5f && age <= 0.75f )
 			{
@@ -268,11 +274,11 @@ Branch::setAge( float age )
 						static const QColor c2( Qt::red );
 
 						const int red = (int)( ratio * c1.redF() +
-							( 1 - ratio ) * c2.redF() );
+							( 1.0f - ratio ) * c2.redF() );
 						const int green = (int)( ratio * c1.greenF() +
-							( 1 - ratio ) * c2.greenF() );
+							( 1.0f - ratio ) * c2.greenF() );
 						const int blue = (int)( ratio * c1.blueF() +
-							( 1 - ratio ) * c2.blueF() );
+							( 1.0f - ratio ) * c2.blueF() );
 
 						(*it).first->setColor( QColor( red, green, blue ) );
 
@@ -325,6 +331,7 @@ Branch::setAge( float age )
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
+			d->m_children.last()->placeLeafs();
 
 			angle += 360.0f / (float) count;
 		}
@@ -342,4 +349,24 @@ Branch::updatePosition()
 	d->m_startPos = d->m_transform->matrix() * start;
 
 	d->m_endPos = d->m_transform->matrix() * end;
+}
+
+void
+Branch::placeLeafs()
+{
+	std::random_device rd;
+	std::mt19937 gen( rd() );
+	std::uniform_real_distribution< float > rotdis( 0.0f,
+		c_leafRotationDistortion );
+
+	float startLeafAngle = rotdis( gen );
+
+	for( quint8 i = 0; i < c_leafsCount; ++i )
+	{
+		d->m_leafs.at( i ).first->rotate( startLeafAngle );
+		d->m_leafs.at( i ).first->updatePosition();
+		d->m_leafs.at( i ).first->setAge( 0.0f );
+
+		startLeafAngle += 360.0f / (float) c_leafsCount;
+	}
 }

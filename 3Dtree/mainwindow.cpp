@@ -43,7 +43,7 @@
 
 
 //! Grow timer in milliseconds.
-static const int c_growTimer = 1000;
+static const int c_growTimer = 100;
 
 //
 // MainWindowPrivate

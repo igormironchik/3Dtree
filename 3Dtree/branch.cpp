@@ -53,7 +53,7 @@ public:
 		,	m_endParentPos( endParentPos )
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
-		,	m_startPos( 0.0f, 0.0f, 0.0f )
+		,	m_startPos( endParentPos )
 		,	q( parent )
 	{
 	}
@@ -78,7 +78,7 @@ public:
 	//! Is this branch a continuation of the parent?
 	bool m_continuation;
 	//! Start pos.
-	QVector3D m_startPos;
+	const QVector3D & m_startPos;
 	//! End pos.
 	QVector3D m_endPos;
 	//! Leafs.
@@ -122,8 +122,6 @@ BranchPrivate::init()
 
 	m_transform->setTranslation( m_endParentPos );
 
-	m_startPos = m_endParentPos;
-
 	m_endPos = m_startPos + QVector3D( 0.0f, m_mesh->length(), 0.0f );
 
 	q->addComponent( m_transform );
@@ -140,18 +138,18 @@ BranchPrivate::init()
 	std::uniform_real_distribution< float > rotdis( 0.0f,
 		c_leafRotationDistortion );
 
-	float startLeafAngle = rotdis( gen );
+//	float startLeafAngle = rotdis( gen );
 
-	for( quint8 i = 0; i < c_leafsCount; ++i )
-	{
-		m_leafs.push_back( qMakePair( new Leaf( m_startPos, m_endPos, q ),
-			false ) );
-		m_leafs.last().first->rotate( startLeafAngle );
-		m_leafs.last().first->updatePosition();
-		m_leafs.last().first->setAge( 0.0f );
+//	for( quint8 i = 0; i < c_leafsCount; ++i )
+//	{
+//		m_leafs.push_back( qMakePair( new Leaf( m_startPos, m_endPos, q ),
+//			false ) );
+//		m_leafs.last().first->rotate( startLeafAngle );
+//		m_leafs.last().first->updatePosition();
+//		m_leafs.last().first->setAge( 0.0f );
 
-		startLeafAngle += 360.0f / (float) c_leafsCount;
-	}
+//		startLeafAngle += 360.0f / (float) c_leafsCount;
+//	}
 }
 
 void
@@ -165,7 +163,7 @@ BranchPrivate::placeOnTopAndParallel()
 
 	const float cosAngle = QVector3D::dotProduct( parent, b );
 
-	const float angle = std::acos( cosAngle ) * c_degInRad;
+	const float angle = - std::acos( cosAngle ) * c_degInRad;
 
 	m_transform->setRotation( Qt3DCore::QTransform::fromAxisAndAngle( axis,
 		angle ) );
@@ -210,8 +208,8 @@ Branch::rotate( float angle )
 	std::mt19937 gen( rd() );
 	std::uniform_real_distribution< float > dis( 0.0f, c_maxBranchAngle );
 
-	const float plainAngle = std::acos( cosAngle ) * c_degInRad
-		+ dis( gen ) - 90.0f;
+	const float plainAngle = 90.0f - std::acos( cosAngle ) * c_degInRad
+		- dis( gen );
 
 	const QQuaternion q = Qt3DCore::QTransform::fromAxesAndAngles( axis,
 		plainAngle, parent, angle );
@@ -237,7 +235,7 @@ Branch::setAge( float age )
 
 	updatePosition();
 
-	if( age < 1.0f )
+	if( age < 1.0f && !d->m_leafs.isEmpty() )
 	{
 		for( auto it = d->m_leafs.begin(), last = d->m_leafs.end();
 			it != last; ++it )
@@ -306,47 +304,65 @@ Branch::setAge( float age )
 	}
 	else if( age >= 1.0f )
 	{
-		if( c_hasContinuationBranch )
-		{
-			d->m_children.push_back( new Branch( d->m_startPos,
-				d->m_endPos, d->m_mesh->topRadius(), true, this ) );
-			d->m_children.last()->updatePosition();
-			d->m_children.last()->setAge( 0.0f );
-		}
+//		if( c_hasContinuationBranch )
+//		{
+//			d->m_children.push_back( new Branch( d->m_startPos,
+//				d->m_endPos, d->m_mesh->topRadius() * d->m_transform->scale(),
+//				true, this ) );
+//			d->m_children.last()->updatePosition();
+//			d->m_children.last()->setAge( 0.0f );
+//		}
 
-		const quint8 count = c_childBranchesCount -
-			( c_hasContinuationBranch ? 1 : 0 );
+//		const quint8 count = c_childBranchesCount -
+//			( c_hasContinuationBranch ? 1 : 0 );
 
-		std::random_device rd;
-		std::mt19937 gen( rd() );
-		std::uniform_real_distribution< float > dis( 0.0f,
-			c_branchRotationDistortion );
+//		std::random_device rd;
+//		std::mt19937 gen( rd() );
+//		std::uniform_real_distribution< float > dis( 0.0f,
+//			c_branchRotationDistortion );
 
-		float angle = dis( gen );
+//		float angle = dis( gen );
 
-		for( quint8 i = 0; i < count; ++i )
-		{
-			d->m_children.push_back( new Branch( d->m_startPos,
-				d->m_endPos, d->m_mesh->topRadius(), false, this ) );
-			d->m_children.last()->rotate( angle );
-			d->m_children.last()->updatePosition();
-			d->m_children.last()->setAge( 0.0f );
-			d->m_children.last()->placeLeafs();
+//		for( quint8 i = 0; i < count; ++i )
+//		{
+//			d->m_children.push_back( new Branch( d->m_startPos,
+//				d->m_endPos, d->m_mesh->topRadius() * d->m_transform->scale(),
+//				false, this ) );
+//			d->m_children.last()->rotate( angle );
+//			d->m_children.last()->updatePosition();
+//			d->m_children.last()->setAge( 0.0f );
+//			d->m_children.last()->placeLeafs();
 
-			angle += 360.0f / (float) count;
-		}
+//			angle += 360.0f / (float) count;
+//		}
 	}
 }
 
 void
 Branch::updatePosition()
 {
-	d->m_transform->setTranslation( d->m_endParentPos );
+	QVector3D v( 0.0f, 0.0f, 0.0f );
 
-	const QVector3D end( 0.0f, d->m_mesh->length(), 0.0f );
-	const QVector3D start( 0.0f, 0.0f, 0.0f );
+	if( d->m_continuation )
+	{
+		v = ( endPos() - startPos() ).normalized();
+		const float m = length() / 2.0f / v.length();
+		v *= m;
+	}
+	else
+	{
+		const QVector3D start( 0.0f, 0.0f, 0.0f );
+		const QVector3D end( 0.0f, length(), 0.0f );
 
-	d->m_startPos = d->m_transform->matrix() * start;
+		v = ( d->m_transform->matrix() *
+			( end - start ) ).normalized();
+		const float m = length() / 2.0f / v.length();
+		v *= m;
+	}
+
+	d->m_transform->setTranslation( d->m_endParentPos + v );
+
+	const QVector3D end( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
 
 	d->m_endPos = d->m_transform->matrix() * end;
 }
@@ -354,19 +370,43 @@ Branch::updatePosition()
 void
 Branch::placeLeafs()
 {
-	std::random_device rd;
-	std::mt19937 gen( rd() );
-	std::uniform_real_distribution< float > rotdis( 0.0f,
-		c_leafRotationDistortion );
+//	std::random_device rd;
+//	std::mt19937 gen( rd() );
+//	std::uniform_real_distribution< float > rotdis( 0.0f,
+//		c_leafRotationDistortion );
 
-	float startLeafAngle = rotdis( gen );
+//	float startLeafAngle = rotdis( gen );
 
-	for( quint8 i = 0; i < c_leafsCount; ++i )
-	{
-		d->m_leafs.at( i ).first->rotate( startLeafAngle );
-		d->m_leafs.at( i ).first->updatePosition();
-		d->m_leafs.at( i ).first->setAge( 0.0f );
+//	for( quint8 i = 0; i < c_leafsCount; ++i )
+//	{
+//		d->m_leafs.at( i ).first->rotate( startLeafAngle );
+//		d->m_leafs.at( i ).first->updatePosition();
+//		d->m_leafs.at( i ).first->setAge( 0.0f );
 
-		startLeafAngle += 360.0f / (float) c_leafsCount;
-	}
+//		startLeafAngle += 360.0f / (float) c_leafsCount;
+//	}
+}
+
+const QVector3D &
+Branch::startPos() const
+{
+	return d->m_startPos;
+}
+
+const QVector3D &
+Branch::endPos() const
+{
+	return d->m_endPos;
+}
+
+float
+Branch::topRadius() const
+{
+	return d->m_mesh->topRadius() * d->m_transform->scale();
+}
+
+float
+Branch::length() const
+{
+	return d->m_mesh->length() * d->m_transform->scale();
 }

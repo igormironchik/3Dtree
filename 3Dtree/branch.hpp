@@ -26,6 +26,7 @@
 // Qt include.
 #include <Qt3DCore/QEntity>
 #include <QScopedPointer>
+#include <Qt3DCore/QTransform>
 
 
 //
@@ -53,6 +54,18 @@ public:
 
 	//! Update position.
 	void updatePosition();
+
+	//! \return Start pos.
+	const QVector3D & startPos() const;
+
+	//! \return End pos.
+	const QVector3D & endPos() const;
+
+	//! \return Top radius.
+	float topRadius() const;
+
+	//! \return Length.
+	float length() const;
 
 protected:
 	//! Place leafs.

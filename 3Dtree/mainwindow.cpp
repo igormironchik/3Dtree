@@ -41,6 +41,8 @@
 #include <Qt3DRender/QPointLight>
 #include <Qt3DCore/QTransform>
 
+#include <QDebug>
+
 
 //! Grow timer in milliseconds.
 static const int c_growTimer = 100;
@@ -171,7 +173,21 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	lightTransform->setTranslation( cameraEntity->position() );
 	lightEntity->addComponent( lightTransform );
 
-	createTree();
+	//createTree();
+
+//	Leaf * l = new Leaf( m_startPos, m_endPos, m_rootEntity );
+//	l->setAge( 1.0f );
+//	l->rotate( 150.0f );
+
+	Branch * b = new Branch( m_startPos, m_endPos, 1.0f, true, m_rootEntity );
+	b->setAge( 2.0f );
+	b->updatePosition();
+
+	Branch * b1 = new Branch( b->startPos(), b->endPos(), b->topRadius(),
+		false, m_rootEntity );
+	b1->setAge( 1.0f );
+	b1->rotate( 45.0f );
+	b1->updatePosition();
 
 	view->setRootEntity( m_rootEntity );
 }
@@ -252,5 +268,5 @@ MainWindow::timer()
 		d->m_playing = false;
 	}
 	else
-		d->m_tree->setAge( d->m_currentAge );
+	{}//	d->m_tree->setAge( d->m_currentAge );
 }

@@ -43,7 +43,7 @@ public:
 	Branch( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
 		float parentRadius, bool continuation,
-		Qt3DCore::QNode * parent = Q_NULLPTR );
+		Qt3DCore::QEntity * parent = Q_NULLPTR );
 	~Branch();
 
 	//! Rotate on top of the parent.
@@ -72,6 +72,7 @@ protected:
 	void placeLeafs();
 
 private:
+	friend class MainWindowPrivate;
 	friend class BranchPrivate;
 
 	Q_DISABLE_COPY( Branch )

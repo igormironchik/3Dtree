@@ -80,9 +80,9 @@ LeafPrivate::init()
 
 	m_material = new QPhongMaterial( q );
 
-	m_material->setAmbient( Qt::darkGreen );
+	//m_material->setAmbient( Qt::darkGreen );
 	m_material->setDiffuse( Qt::darkGreen );
-	m_material->setSpecular( Qt::darkGreen );
+	//m_material->setSpecular( Qt::darkGreen );
 
 	q->addComponent( m_material );
 
@@ -113,9 +113,9 @@ Leaf::~Leaf()
 void
 Leaf::setColor( const QColor & c )
 {
-	d->m_material->setAmbient( c );
+	//d->m_material->setAmbient( c );
 	d->m_material->setDiffuse( c );
-	d->m_material->setSpecular( c );
+	//d->m_material->setSpecular( c );
 }
 
 void

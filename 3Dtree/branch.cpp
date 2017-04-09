@@ -30,8 +30,6 @@
 #include <Qt3DExtras/QConeMesh>
 #include <Qt3DExtras/QPhongMaterial>
 
-#include <Qt3DExtras/QSphereMesh>
-
 #include <QList>
 
 // C++ include.
@@ -315,38 +313,6 @@ Branch::setAge( float age )
 			c_branchRotationDistortion );
 
 		float angle = dis( gen );
-
-		static float a = 0.0f;
-
-		// Sphere shape data
-	Qt3DExtras::QSphereMesh *sphereMesh = new Qt3DExtras::QSphereMesh();
-	sphereMesh->setRings(20);
-	sphereMesh->setSlices(20);
-	sphereMesh->setRadius(2);
-
-	// Sphere mesh transform
-	Qt3DCore::QTransform *sphereTransform = new Qt3DCore::QTransform();
-
-	sphereTransform->setScale(0.5f);
-
-		QMatrix4x4 m = sphereTransform->matrix();
-
-		m.rotate( a, QVector3D( 0.0f, 1.0f, 0.0f ) );
-	m.translate( QVector3D(-3.0f, 0.0f, 0.0f) );
-
-		sphereTransform->setMatrix( m );
-
-		a += 360.0f / 30.0f;
-
-	Qt3DExtras::QPhongMaterial *sphereMaterial = new Qt3DExtras::QPhongMaterial();
-	sphereMaterial->setDiffuse(QColor(QRgb(0xa69929)));
-
-	// Sphere
-	Qt3DCore::QEntity * sphereEntity = new Qt3DCore::QEntity( parentEntity() );
-	sphereEntity->addComponent(sphereMesh);
-	sphereEntity->addComponent(sphereMaterial);
-	sphereEntity->addComponent(sphereTransform);
-
 
 		for( quint8 i = 0; i < count; ++i )
 		{

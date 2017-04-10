@@ -29,6 +29,8 @@
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DCore/QTransform>
 
+#include <QtMath>
+
 // C++ include.
 #include <cmath>
 #include <random>
@@ -153,7 +155,7 @@ Leaf::rotate( float angle )
 	std::mt19937 gen( rd() );
 	std::uniform_real_distribution< float > dis( 0.0f, c_leafAngle );
 
-	const float plainAngle = std::acos( cosPlainAngle ) * c_degInRad -
+	const float plainAngle = qRadiansToDegrees( std::acos( cosPlainAngle ) ) -
 		dis( gen );
 
 	const QQuaternion quat = Qt3DCore::QTransform::fromAxesAndAngles(

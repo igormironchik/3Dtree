@@ -31,10 +31,13 @@
 #include <Qt3DExtras/QPhongMaterial>
 
 #include <QList>
+#include <QtMath>
 
 // C++ include.
 #include <random>
 #include <cmath>
+
+#include <Qt3DExtras/QSphereMesh>
 
 
 //
@@ -150,13 +153,13 @@ BranchPrivate::placeOnTopAndParallel()
 {
 	const QVector3D parent = ( m_endParentPos - m_startParentPos )
 		.normalized();
-	const QVector3D b( 0.0f, 1.0f, 0.0f );
+	const QVector3D b = QVector3D( 0.0f, 1.0f, 0.0f ).normalized();
 
 	const QVector3D axis = QVector3D::crossProduct( parent, b );
 
 	const float cosAngle = QVector3D::dotProduct( parent, b );
 
-	const float angle = - std::acos( cosAngle ) * c_degInRad;
+	const float angle = - qRadiansToDegrees( std::acos( cosAngle ) );
 
 	m_transform->setRotation( Qt3DCore::QTransform::fromAxisAndAngle( axis,
 		angle ) );
@@ -201,7 +204,7 @@ Branch::rotate( float angle )
 	std::mt19937 gen( rd() );
 	std::uniform_real_distribution< float > dis( 0.0f, c_maxBranchAngle );
 
-	const float plainAngle = 90.0f - std::acos( cosAngle ) * c_degInRad
+	const float plainAngle = 90.0f - qRadiansToDegrees( std::acos( cosAngle ) )
 		- dis( gen );
 
 	const QQuaternion q = Qt3DCore::QTransform::fromAxesAndAngles( axis,
@@ -333,30 +336,20 @@ Branch::updatePosition()
 {
 	QVector3D v( 0.0f, 0.0f, 0.0f );
 
-	if( d->m_continuation )
-	{
-		v = ( endPos() - startPos() ).normalized();
-		const float m = ( !qFuzzyIsNull( v.length() ) ?
-			length() / 2.0f / v.length() : 1.0f );
-		v *= m;
-	}
-	else
-	{
-		const QVector3D start( 0.0f, 0.0f, 0.0f );
-		const QVector3D end( 0.0f, length(), 0.0f );
+	const QVector3D start( 0.0f, 0.0f, 0.0f );
+	const QVector3D end( 0.0f, length(), 0.0f );
 
-		v = ( d->m_transform->matrix() *
-			( end - start ) ).normalized();
-		const float m = ( !qFuzzyIsNull( v.length() ) ?
-			length() / 2.0f / v.length() : 1.0f );
-		v *= m;
-	}
+	v = ( d->m_transform->matrix() *
+		( end - start ) ).normalized();
+	const float m = ( !qFuzzyIsNull( v.length() ) ?
+		length() / 2.0f / v.length() : 1.0f );
+	v *= m;
 
 	d->m_transform->setTranslation( d->m_endParentPos + v );
 
-	const QVector3D end( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
+	const QVector3D tmp( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
 
-	d->m_endPos = d->m_transform->matrix() * end;
+	d->m_endPos = d->m_transform->matrix() * tmp;
 }
 
 void

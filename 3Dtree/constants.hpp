@@ -27,10 +27,6 @@
 #include <QtGlobal>
 
 
-//! Degries in radian.
-static const float c_degInRad = 57.2958f;
-
-
 //
 // Leaf constants.
 //

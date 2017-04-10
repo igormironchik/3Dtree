@@ -54,7 +54,7 @@ static const float c_branchDistortion = 0.01f;
 //! Delta of the branch radius.
 static const float c_branchRadiusDelta = 0.003f;
 //! Start branch radius.
-static const float c_startBranchRadius = 0.05f;
+static const float c_startBranchRadius = 0.03f;
 //! Branch length.
 static const float c_branchLength = 0.35f;
 //! Distortion of the branch length.

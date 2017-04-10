@@ -126,25 +126,30 @@ Leaf::setColor( const QColor & c )
 QColor
 Leaf::autumnColor()
 {
-	QPixmap pixmap( 100, 2 );
+	static QImage img;
 
-	QPainter p( &pixmap );
+	static std::random_device rd;
+	static std::mt19937 gen( rd() );
+	static std::uniform_int_distribution< int > autumn( 0, 99 );
 
-	QLinearGradient g( 0.0, 1.0, 100.0, 1.0 );
-	g.setColorAt( 0.0, Qt::yellow );
-	g.setColorAt( 1.0, Qt::red );
+	if( img.isNull() )
+	{
+		QPixmap pixmap( 100, 2 );
 
-	p.setBrush( g );
+		QPainter p( &pixmap );
 
-	p.drawRect( 0, 0, 100, 2 );
+		QLinearGradient g( 0.0, 1.0, 100.0, 1.0 );
+		g.setColorAt( 0.0, Qt::yellow );
+		g.setColorAt( 1.0, Qt::red );
 
-	std::random_device rd;
-	std::mt19937 gen( rd() );
-	std::uniform_int_distribution< int > autumn( 0, 99 );
+		p.setBrush( g );
 
-	const QImage i = pixmap.toImage();
+		p.drawRect( 0, 0, 100, 2 );
 
-	return i.pixelColor( autumn( gen ), 1 );
+		img = pixmap.toImage();
+	}
+
+	return img.pixelColor( autumn( gen ), 1 );
 }
 
 void

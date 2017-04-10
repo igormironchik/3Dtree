@@ -37,7 +37,23 @@
 #include <random>
 #include <cmath>
 
-#include <Qt3DExtras/QSphereMesh>
+
+//
+// LeafData
+//
+
+struct LeafData Q_DECL_FINAL {
+	explicit LeafData( Leaf * l )
+		:	m_leaf( l )
+		,	m_autumn( false )
+		,	m_deleted( false )
+	{
+	}
+
+	Leaf * m_leaf;
+	bool m_autumn;
+	bool m_deleted;
+}; // struct LeafData
 
 
 //
@@ -86,7 +102,7 @@ public:
 	//! End pos.
 	QVector3D m_endPos;
 	//! Leafs.
-	QList< QPair< Leaf*, bool > > m_leafs;
+	QList< LeafData > m_leafs;
 	//! Child branches.
 	QList< Branch* > m_children;
 	//! Parent.
@@ -145,10 +161,10 @@ BranchPrivate::init()
 	// Create leafs.
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
-		m_leafs.push_back( qMakePair( new Leaf( m_startPos, m_endPos,
-			q->parentEntity() ), false ) );
-		m_leafs.last().first->updatePosition();
-		m_leafs.last().first->setAge( 0.0f );
+		m_leafs.push_back( LeafData( new Leaf( m_startPos, m_endPos,
+			q->parentEntity() ) ) );
+		m_leafs.last().m_leaf->updatePosition();
+		m_leafs.last().m_leaf->setAge( 0.0f );
 	}
 }
 
@@ -233,6 +249,8 @@ Branch::setAge( float age )
 
 	const float summerAge = i + tmp;
 
+	static const float c_deepAutumn = 0.96f;
+
 	d->m_transform->setScale( summerAge <= 1.0 ? summerAge :
 		 1.0f + summerAge / ( 100.0f / 3.0f ) );
 
@@ -246,15 +264,15 @@ Branch::setAge( float age )
 			// Spring.
 			if( age <= 0.25f )
 			{
-				(*it).first->setAge( age * 4.0f );
-				(*it).first->updatePosition();
+				(*it).m_leaf->setAge( age * 4.0f );
+				(*it).m_leaf->updatePosition();
 			}
 			else if( age > 0.25f && age <= 0.5f )
-				(*it).first->updatePosition();
+				(*it).m_leaf->updatePosition();
 			// Autumn.
 			else if( age > 0.5f && age <= 0.75f )
 			{
-				if( !(*it).second )
+				if( !(*it).m_autumn )
 				{
 					std::random_device rd;
 					std::mt19937 gen( rd() );
@@ -263,19 +281,43 @@ Branch::setAge( float age )
 
 					if( autumn( gen ) > 0.63f )
 					{
-						(*it).first->setColor( Leaf::autumnColor() );
+						(*it).m_leaf->setColor( Leaf::autumnColor() );
 
-						(*it).second = true;
+						(*it).m_autumn = true;
 					}
 				}
 			}
-			// Winter.
+			// Deep autumn.
 			else if( age > 0.75f )
-				(*it).first->deleteLater();
+			{
+				if( !(*it).m_deleted )
+				{
+					std::random_device rd;
+					std::mt19937 gen( rd() );
+					std::uniform_real_distribution< float > autumn( age,
+						0.97f );
+
+					if( autumn( gen ) > c_deepAutumn )
+					{
+						(*it).m_leaf->deleteLater();
+
+						(*it).m_deleted = true;
+					}
+				}
+			}
 		}
 
-		if( age > 0.75f )
+		if( age > c_deepAutumn )
+		{
+			for( auto it = d->m_leafs.begin(), last = d->m_leafs.end();
+				it != last; ++it )
+			{
+				if( !(*it).m_deleted )
+					(*it).m_leaf->deleteLater();
+			}
+
 			d->m_leafs.clear();
+		}
 	}
 
 	if( !d->m_children.isEmpty() )
@@ -350,9 +392,9 @@ Branch::placeLeafs()
 
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
-		d->m_leafs.at( i ).first->rotate( startLeafAngle );
-		d->m_leafs.at( i ).first->updatePosition();
-		d->m_leafs.at( i ).first->setAge( 0.0f );
+		d->m_leafs.at( i ).m_leaf->rotate( startLeafAngle );
+		d->m_leafs.at( i ).m_leaf->updatePosition();
+		d->m_leafs.at( i ).m_leaf->setAge( 0.0f );
 
 		startLeafAngle += 360.0f / (float) c_leafsCount;
 	}

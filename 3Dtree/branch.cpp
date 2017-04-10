@@ -263,25 +263,7 @@ Branch::setAge( float age )
 
 					if( autumn( gen ) > 0.63f )
 					{
-						static const float segmentLength = 1.0f;
-
-						std::uniform_real_distribution< float > dis( 0.0f,
-							segmentLength );
-
-						const float pdist = dis( gen );
-						const float ratio = pdist / segmentLength;
-
-						static const QColor c1( Qt::yellow );
-						static const QColor c2( Qt::red );
-
-						const int red = (int)( ratio * c1.redF() +
-							( 1.0f - ratio ) * c2.redF() );
-						const int green = (int)( ratio * c1.greenF() +
-							( 1.0f - ratio ) * c2.greenF() );
-						const int blue = (int)( ratio * c1.blueF() +
-							( 1.0f - ratio ) * c2.blueF() );
-
-						(*it).first->setColor( QColor( red, green, blue ) );
+						(*it).first->setColor( Leaf::autumnColor() );
 
 						(*it).second = true;
 					}

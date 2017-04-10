@@ -30,6 +30,9 @@
 #include <Qt3DCore/QTransform>
 
 #include <QtMath>
+#include <QPixmap>
+#include <QPainter>
+#include <QLinearGradient>
 
 // C++ include.
 #include <cmath>
@@ -118,6 +121,30 @@ Leaf::setColor( const QColor & c )
 	//d->m_material->setAmbient( c );
 	d->m_material->setDiffuse( c );
 	//d->m_material->setSpecular( c );
+}
+
+QColor
+Leaf::autumnColor()
+{
+	QPixmap pixmap( 100, 2 );
+
+	QPainter p( &pixmap );
+
+	QLinearGradient g( 0.0, 1.0, 100.0, 1.0 );
+	g.setColorAt( 0.0, Qt::yellow );
+	g.setColorAt( 1.0, Qt::red );
+
+	p.setBrush( g );
+
+	p.drawRect( 0, 0, 100, 2 );
+
+	std::random_device rd;
+	std::mt19937 gen( rd() );
+	std::uniform_int_distribution< int > autumn( 0, 99 );
+
+	const QImage i = pixmap.toImage();
+
+	return i.pixelColor( autumn( gen ), 1 );
 }
 
 void

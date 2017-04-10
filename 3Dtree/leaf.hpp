@@ -61,6 +61,9 @@ public:
 	//! center on the end of the branch.
 	void rotate( float angle );
 
+	//! \return Autumn's color.
+	static QColor autumnColor();
+
 private:
 	friend class LeafPrivate;
 

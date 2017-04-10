@@ -76,11 +76,11 @@ public:
 void
 LeafPrivate::init()
 {
-	m_mesh = new LeafMesh( q );
+	m_mesh = new LeafMesh;
 
 	q->addComponent( m_mesh );
 
-	m_material = new QPhongMaterial( q );
+	m_material = new QPhongMaterial;
 
 	//m_material->setAmbient( Qt::darkGreen );
 	m_material->setDiffuse( Qt::darkGreen );
@@ -88,7 +88,7 @@ LeafPrivate::init()
 
 	q->addComponent( m_material );
 
-	m_transform = new Qt3DCore::QTransform( q );
+	m_transform = new Qt3DCore::QTransform;
 
 	m_transform->setTranslation( m_endBranchPos );
 

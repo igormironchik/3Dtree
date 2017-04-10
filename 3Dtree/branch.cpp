@@ -58,6 +58,7 @@ public:
 		,	m_continuation( continuation )
 		,	m_startPos( endParentPos )
 		,	q( parent )
+		,	l( Q_NULLPTR )
 	{
 	}
 
@@ -90,12 +91,14 @@ public:
 	QList< Branch* > m_children;
 	//! Parent.
 	Branch * q;
+
+	Leaf * l;
 }; // class BranchPrivate
 
 void
 BranchPrivate::init()
 {
-	m_mesh = new Qt3DExtras::QConeMesh( q );
+	m_mesh = new Qt3DExtras::QConeMesh;
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
@@ -121,7 +124,7 @@ BranchPrivate::init()
 
 	q->addComponent( m_mesh );
 
-	m_transform = new Qt3DCore::QTransform( q );
+	m_transform = new Qt3DCore::QTransform;
 
 	m_transform->setTranslation( m_endParentPos );
 
@@ -129,12 +132,13 @@ BranchPrivate::init()
 
 	q->addComponent( m_transform );
 
-	m_material = new Qt3DExtras::QPhongMaterial( q );
+	m_material = new Qt3DExtras::QPhongMaterial;
 
 	m_material->setDiffuse( Qt::darkGray );
 
 	q->addComponent( m_material );
 
+	// If this branch is continuation branch then place it on top and parallel.
 	if( m_continuation )
 		placeOnTopAndParallel();
 

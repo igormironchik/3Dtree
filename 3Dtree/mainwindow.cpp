@@ -171,38 +171,7 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	lightTransform->setTranslation( cameraEntity->position() );
 	lightEntity->addComponent( lightTransform );
 
-//	createTree();
-
-//
-// Test code for the leafs.
-//
-
-/*
-	Leaf * l = new Leaf( m_startPos, m_endPos, m_rootEntity );
-	l->setAge( 1.0f );
-	l->rotate( 150.0f );
-*/
-
-//
-// Test code for branches.
-//
-
-
-	Branch * b = new Branch( m_startPos, m_endPos, 0.05f, true, m_rootEntity );
-	b->updatePosition();
-	b->setAge( 1.0f );
-	b->setAge( 1.5f );
-	b->setAge( 2.0f );
-	//b->setAge( 2.2f );
-	b->setAge( 2.5f );
-	//b->setAge( 1.2f );
-
-//	Branch * b1 = new Branch( b->startPos(), b->endPos(), b->topRadius(),
-//		false, m_rootEntity );
-//	b1->setAge( 1.0f );
-//	b1->rotate( 45.0f );
-//	b1->updatePosition();
-
+	createTree();
 
 	view->setRootEntity( m_rootEntity );
 }
@@ -211,7 +180,10 @@ void
 MainWindowPrivate::createTree()
 {
 	if( m_tree )
-		m_tree->deleteLater();
+	{
+		for( const auto & e : m_rootEntity->childNodes() )
+			e->deleteLater();
+	}
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
 		true, m_rootEntity );

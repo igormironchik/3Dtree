@@ -67,6 +67,12 @@ public:
 	{
 	}
 
+	~MainWindowPrivate()
+	{
+		for( const auto & e : m_rootEntity->childNodes() )
+			e->deleteLater();
+	}
+
 	//! Init.
 	void init( Qt3DExtras::Qt3DWindow * view );
 	//! Init 3D.

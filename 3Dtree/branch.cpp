@@ -84,11 +84,11 @@ public:
 	void placeOnTopAndParallel();
 
 	//! Mesh.
-	Qt3DExtras::QConeMesh * m_mesh;
+	QScopedPointer< Qt3DExtras::QConeMesh > m_mesh;
 	//! Transform.
-	Qt3DCore::QTransform * m_transform;
+	QScopedPointer< Qt3DCore::QTransform > m_transform;
 	//! Material.
-	Qt3DExtras::QPhongMaterial * m_material;
+	QScopedPointer< Qt3DExtras::QPhongMaterial > m_material;
 	//! Start parent pos.
 	const QVector3D & m_startParentPos;
 	//! End parent pos.
@@ -114,7 +114,7 @@ public:
 void
 BranchPrivate::init()
 {
-	m_mesh = new Qt3DExtras::QConeMesh;
+	m_mesh.reset( new Qt3DExtras::QConeMesh );
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
@@ -138,21 +138,21 @@ BranchPrivate::init()
 	m_mesh->setRings( 20 );
 	m_mesh->setSlices( 10 );
 
-	q->addComponent( m_mesh );
+	q->addComponent( m_mesh.data() );
 
-	m_transform = new Qt3DCore::QTransform;
+	m_transform.reset( new Qt3DCore::QTransform );
 
 	m_transform->setTranslation( m_endParentPos );
 
 	m_endPos = m_startPos + QVector3D( 0.0f, m_mesh->length(), 0.0f );
 
-	q->addComponent( m_transform );
+	q->addComponent( m_transform.data() );
 
-	m_material = new Qt3DExtras::QPhongMaterial;
+	m_material.reset( new Qt3DExtras::QPhongMaterial );
 
 	m_material->setDiffuse( Qt::darkGray );
 
-	q->addComponent( m_material );
+	q->addComponent( m_material.data() );
 
 	// If this branch is continuation branch then place it on top and parallel.
 	if( m_continuation )

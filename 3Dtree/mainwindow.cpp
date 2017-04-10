@@ -122,7 +122,7 @@ MainWindowPrivate::init( Qt3DExtras::Qt3DWindow * view )
 	m_years = new QSpinBox( q );
 	m_years->setMinimum( 1 );
 	m_years->setMaximum( 99 );
-	m_years->setValue( 3 );
+	m_years->setValue( 5 );
 	l1->addWidget( m_years );
 
 	m_btn = new QPushButton( MainWindow::tr( "Pause" ), q );

@@ -63,11 +63,11 @@ public:
 	void init();
 
 	//! Mesh.
-	LeafMesh * m_mesh;
+	QScopedPointer< LeafMesh > m_mesh;
 	//! Material.
-	QPhongMaterial * m_material;
+	QScopedPointer< QPhongMaterial > m_material;
 	//! Transform.
-	Qt3DCore::QTransform * m_transform;
+	QScopedPointer< Qt3DCore::QTransform > m_transform;
 	//! Start branch position.
 	const QVector3D & m_startBranchPos;
 	//! End branch position.
@@ -79,23 +79,23 @@ public:
 void
 LeafPrivate::init()
 {
-	m_mesh = new LeafMesh;
+	m_mesh.reset( new LeafMesh );
 
-	q->addComponent( m_mesh );
+	q->addComponent( m_mesh.data() );
 
-	m_material = new QPhongMaterial;
+	m_material.reset( new QPhongMaterial );
 
 	//m_material->setAmbient( Qt::darkGreen );
 	m_material->setDiffuse( Qt::darkGreen );
 	//m_material->setSpecular( Qt::darkGreen );
 
-	q->addComponent( m_material );
+	q->addComponent( m_material.data() );
 
-	m_transform = new Qt3DCore::QTransform;
+	m_transform.reset( new Qt3DCore::QTransform );
 
 	m_transform->setTranslation( m_endBranchPos );
 
-	q->addComponent( m_transform );
+	q->addComponent( m_transform.data() );
 }
 
 

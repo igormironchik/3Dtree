@@ -67,5 +67,7 @@ static const quint8 c_childBranchesCount = 4;
 static const bool c_hasContinuationBranch = true;
 //! Rotation of the branch distortion.
 static const float c_branchRotationDistortion = 35.0f;
+//! How much branch should be longer after 100 years.
+static const float c_branchLengthMultiplicator = 50.0f;
 
 #endif // TREE__CONSTANTS_HPP__INCLUDED

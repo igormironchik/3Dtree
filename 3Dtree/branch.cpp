@@ -68,13 +68,13 @@ public:
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( Q_NULLPTR )
+		,	m_length( 0.0f )
 		,	m_startParentPos( startParentPos )
 		,	m_endParentPos( endParentPos )
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
 		,	m_startPos( endParentPos )
 		,	q( parent )
-		,	l( Q_NULLPTR )
 	{
 	}
 
@@ -89,6 +89,8 @@ public:
 	QScopedPointer< Qt3DCore::QTransform > m_transform;
 	//! Material.
 	QScopedPointer< Qt3DExtras::QPhongMaterial > m_material;
+	//! Start length.
+	float m_length;
 	//! Start parent pos.
 	const QVector3D & m_startParentPos;
 	//! End parent pos.
@@ -107,8 +109,6 @@ public:
 	QList< Branch* > m_children;
 	//! Parent.
 	Branch * q;
-
-	Leaf * l;
 }; // class BranchPrivate
 
 void
@@ -133,7 +133,9 @@ BranchPrivate::init()
 	m_mesh->setHasBottomEndcap( true );
 	m_mesh->setHasTopEndcap( true );
 
-	m_mesh->setLength( c_branchLength + ldis( gen ) );
+	m_length = c_branchLength + ldis( gen );
+
+	m_mesh->setLength( m_length );
 
 	m_mesh->setRings( 20 );
 	m_mesh->setSlices( 10 );
@@ -252,7 +254,10 @@ Branch::setAge( float age )
 	static const float c_deepAutumn = 0.96f;
 
 	d->m_transform->setScale( summerAge <= 1.0 ? summerAge :
-		 1.0f + summerAge / ( 100.0f / 3.0f ) );
+		 1.0f + summerAge / ( 100.0f / 5.0f ) );
+
+	d->m_mesh->setLength( d->m_length +
+		d->m_length * summerAge / ( 100.0f / c_branchLengthMultiplicator ) );
 
 	updatePosition();
 
@@ -362,18 +367,12 @@ Branch::setAge( float age )
 void
 Branch::updatePosition()
 {
-	QVector3D v( 0.0f, 0.0f, 0.0f );
+	d->m_transform->setTranslation( d->m_endParentPos );
 
-	const QVector3D start( 0.0f, 0.0f, 0.0f );
-	const QVector3D end( 0.0f, length(), 0.0f );
+	QVector3D end = QVector3D( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
+	end = d->m_transform->matrix() * end;
 
-	v = ( d->m_transform->matrix() *
-		( end - start ) ).normalized();
-	const float m = ( !qFuzzyIsNull( v.length() ) ?
-		length() / 2.0f / v.length() : 1.0f );
-	v *= m;
-
-	d->m_transform->setTranslation( d->m_endParentPos + v );
+	d->m_transform->setTranslation( end );
 
 	const QVector3D tmp( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
 

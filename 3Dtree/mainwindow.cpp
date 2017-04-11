@@ -63,6 +63,7 @@ public:
 		,	m_playing( true )
 		,	m_grown( false )
 		,	m_rootEntity( Q_NULLPTR )
+		,	m_lightEntity( Q_NULLPTR )
 		,	q( parent )
 	{
 	}
@@ -102,6 +103,8 @@ public:
 	bool m_grown;
 	//! Root entity.
 	Qt3DCore::QEntity * m_rootEntity;
+	//! Light.
+	Qt3DCore::QEntity * m_lightEntity;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -165,17 +168,17 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 	cameraEntity->setViewCenter( QVector3D( 0.0f, 5.0f, 0.0f ) );
 
-	Qt3DCore::QEntity * lightEntity = new Qt3DCore::QEntity( m_rootEntity );
+	m_lightEntity = new Qt3DCore::QEntity( m_rootEntity );
 
-	Qt3DRender::QPointLight * light = new Qt3DRender::QPointLight( lightEntity );
+	Qt3DRender::QPointLight * light = new Qt3DRender::QPointLight( m_lightEntity );
 	light->setColor( Qt::white );
 	light->setIntensity( 1.0f );
-	lightEntity->addComponent( light );
+	m_lightEntity->addComponent( light );
 
 	Qt3DCore::QTransform * lightTransform = new Qt3DCore::QTransform(
-		lightEntity );
+		m_lightEntity );
 	lightTransform->setTranslation( cameraEntity->position() );
-	lightEntity->addComponent( lightTransform );
+	m_lightEntity->addComponent( lightTransform );
 
 	createTree();
 
@@ -188,7 +191,10 @@ MainWindowPrivate::createTree()
 	if( m_tree )
 	{
 		for( const auto & e : m_rootEntity->childNodes() )
-			e->deleteLater();
+		{
+			if( e != m_lightEntity )
+				e->deleteLater();
+		}
 	}
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,

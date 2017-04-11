@@ -69,5 +69,9 @@ static const bool c_hasContinuationBranch = true;
 static const float c_branchRotationDistortion = 35.0f;
 //! How much branch should be longer after 100 years.
 static const float c_branchLengthMultiplicator = 50.0f;
+//! How slower should branch grow then tree.
+static const float c_branchSlower = 2.0f;
+//! How much branch should be scaled after 100 years.
+static const float c_branchScale = 5.0f;
 
 #endif // TREE__CONSTANTS_HPP__INCLUDED

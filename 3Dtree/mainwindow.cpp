@@ -161,9 +161,9 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 
 	cameraEntity->lens()->setPerspectiveProjection(
 		45.0f, 16.0f / 9.0f, 0.1f, 1000.0f );
-	cameraEntity->setPosition( QVector3D( 0.0f, 0.0f, 20.0f ) );
+	cameraEntity->setPosition( QVector3D( 0.0f, 5.0f, 20.0f ) );
 	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
-	cameraEntity->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
+	cameraEntity->setViewCenter( QVector3D( 0.0f, 5.0f, 0.0f ) );
 
 	Qt3DCore::QEntity * lightEntity = new Qt3DCore::QEntity( m_rootEntity );
 
@@ -192,7 +192,7 @@ MainWindowPrivate::createTree()
 	}
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
-		true, m_rootEntity );
+		true, true, m_rootEntity );
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
 	m_tree->placeLeafs();

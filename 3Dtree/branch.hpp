@@ -42,7 +42,7 @@ class Branch Q_DECL_FINAL
 public:
 	Branch( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
-		float parentRadius, bool continuation,
+		float parentRadius, bool continuation, bool isTree,
 		Qt3DCore::QEntity * parent = Q_NULLPTR );
 	~Branch();
 

@@ -64,7 +64,7 @@ class BranchPrivate {
 public:
 	BranchPrivate( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
-		float parentRadius, bool continuation, Branch * parent )
+		float parentRadius, bool continuation, bool isTree, Branch * parent )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( Q_NULLPTR )
@@ -73,6 +73,7 @@ public:
 		,	m_endParentPos( endParentPos )
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
+		,	m_isTree( isTree )
 		,	m_startPos( endParentPos )
 		,	q( parent )
 	{
@@ -99,6 +100,8 @@ public:
 	float m_parentRadius;
 	//! Is this branch a continuation of the parent?
 	bool m_continuation;
+	//! Is it a tree?
+	bool m_isTree;
 	//! Start pos.
 	const QVector3D & m_startPos;
 	//! End pos.
@@ -196,10 +199,11 @@ BranchPrivate::placeOnTopAndParallel()
 
 Branch::Branch( const QVector3D & startParentPos,
 	const QVector3D & endParentPos,
-	float parentRadius, bool continuation, Qt3DCore::QEntity * parent )
+	float parentRadius, bool continuation, bool isTree,
+	Qt3DCore::QEntity * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos,
-			parentRadius, continuation, this ) )
+			parentRadius, continuation, isTree, this ) )
 {
 	d->init();
 }
@@ -254,10 +258,11 @@ Branch::setAge( float age )
 	static const float c_deepAutumn = 0.96f;
 
 	d->m_transform->setScale( summerAge <= 1.0 ? summerAge :
-		 1.0f + summerAge / ( 100.0f / 5.0f ) );
+		 1.0f + summerAge / ( 100.0f / c_branchScale ) );
 
 	d->m_mesh->setLength( d->m_length +
-		d->m_length * summerAge / ( 100.0f / c_branchLengthMultiplicator ) );
+		d->m_length * summerAge / ( 100.0f / c_branchLengthMultiplicator ) /
+		( !d->m_isTree ? c_branchSlower : 1.0f ) );
 
 	updatePosition();
 
@@ -335,7 +340,7 @@ Branch::setAge( float age )
 		if( c_hasContinuationBranch )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), true, parentEntity() ) );
+				endPos(), topRadius(), true, d->m_isTree, parentEntity() ) );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
 		}
@@ -353,7 +358,7 @@ Branch::setAge( float age )
 		for( quint8 i = 0; i < count; ++i )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), false, parentEntity() ) );
+				endPos(), topRadius(), false, false, parentEntity() ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();

@@ -226,6 +226,8 @@ MainWindow::buttonClicked()
 	{
 		d->m_playing = true;
 
+		d->m_grown = false;
+
 		d->m_btn->setText( tr( "Pause" ) );
 
 		d->m_currentAge = 0.0f;

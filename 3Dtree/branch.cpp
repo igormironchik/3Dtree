@@ -64,10 +64,12 @@ class BranchPrivate {
 public:
 	BranchPrivate( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
-		float parentRadius, bool continuation, bool isTree, Branch * parent )
+		float parentRadius, bool continuation, bool isTree,
+		Qt3DExtras::QPhongMaterial * material,
+		LeafMesh * leafMesh, Branch * parent )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
-		,	m_material( Q_NULLPTR )
+		,	m_material( material )
 		,	m_length( 0.0f )
 		,	m_startParentPos( startParentPos )
 		,	m_endParentPos( endParentPos )
@@ -75,6 +77,7 @@ public:
 		,	m_continuation( continuation )
 		,	m_isTree( isTree )
 		,	m_startPos( endParentPos )
+		,	m_leafMesh( leafMesh )
 		,	q( parent )
 	{
 	}
@@ -89,7 +92,7 @@ public:
 	//! Transform.
 	QScopedPointer< Qt3DCore::QTransform > m_transform;
 	//! Material.
-	QScopedPointer< Qt3DExtras::QPhongMaterial > m_material;
+	Qt3DExtras::QPhongMaterial * m_material;
 	//! Start length.
 	float m_length;
 	//! Start parent pos.
@@ -110,6 +113,8 @@ public:
 	QList< LeafData > m_leafs;
 	//! Child branches.
 	QList< Branch* > m_children;
+	//! Leaf mesh.
+	LeafMesh * m_leafMesh;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -153,11 +158,7 @@ BranchPrivate::init()
 
 	q->addComponent( m_transform.data() );
 
-	m_material.reset( new Qt3DExtras::QPhongMaterial );
-
-	m_material->setDiffuse( Qt::darkGray );
-
-	q->addComponent( m_material.data() );
+	q->addComponent( m_material );
 
 	// If this branch is continuation branch then place it on top and parallel.
 	if( m_continuation )
@@ -167,7 +168,7 @@ BranchPrivate::init()
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
 		m_leafs.push_back( LeafData( new Leaf( m_startPos, m_endPos,
-			q->parentEntity() ) ) );
+			m_leafMesh, q->parentEntity() ) ) );
 		m_leafs.last().m_leaf->updatePosition();
 		m_leafs.last().m_leaf->setAge( 0.0f );
 	}
@@ -200,10 +201,13 @@ BranchPrivate::placeOnTopAndParallel()
 Branch::Branch( const QVector3D & startParentPos,
 	const QVector3D & endParentPos,
 	float parentRadius, bool continuation, bool isTree,
+	Qt3DExtras::QPhongMaterial * material,
+	LeafMesh * leafMesh,
 	Qt3DCore::QEntity * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos,
-			parentRadius, continuation, isTree, this ) )
+			parentRadius, continuation, isTree, material,
+			leafMesh, this ) )
 {
 	d->init();
 }
@@ -340,7 +344,8 @@ Branch::setAge( float age )
 		if( c_hasContinuationBranch )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), true, d->m_isTree, parentEntity() ) );
+				endPos(), topRadius(), true, d->m_isTree, d->m_material,
+				d->m_leafMesh, parentEntity() ) );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
 		}
@@ -358,7 +363,8 @@ Branch::setAge( float age )
 		for( quint8 i = 0; i < count; ++i )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), false, false, parentEntity() ) );
+				endPos(), topRadius(), false, false,
+				d->m_material, d->m_leafMesh, parentEntity() ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();

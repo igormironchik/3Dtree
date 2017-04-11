@@ -24,6 +24,7 @@
 #include "mainwindow.hpp"
 #include "branch.hpp"
 #include "constants.hpp"
+#include "leaf_mesh.hpp"
 
 #include "leaf.hpp"
 
@@ -40,6 +41,7 @@
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QPointLight>
 #include <Qt3DCore/QTransform>
+#include <Qt3DExtras/QPhongMaterial>
 
 
 //! Grow timer in milliseconds.
@@ -64,6 +66,8 @@ public:
 		,	m_grown( false )
 		,	m_rootEntity( Q_NULLPTR )
 		,	m_lightEntity( Q_NULLPTR )
+		,	m_branchMaterial( Q_NULLPTR )
+		,	m_leafMesh( Q_NULLPTR )
 		,	q( parent )
 	{
 	}
@@ -105,6 +109,10 @@ public:
 	Qt3DCore::QEntity * m_rootEntity;
 	//! Light.
 	Qt3DCore::QEntity * m_lightEntity;
+	//! Branch material.
+	Qt3DExtras::QPhongMaterial * m_branchMaterial;
+	//! Leaf mesh.
+	LeafMesh * m_leafMesh;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -159,6 +167,12 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	// Root entity
 	m_rootEntity = new Qt3DCore::QEntity;
 
+	m_branchMaterial = new Qt3DExtras::QPhongMaterial( m_rootEntity );
+
+	m_leafMesh = new LeafMesh( m_rootEntity );
+
+	m_branchMaterial->setDiffuse( Qt::darkGray );
+
 	// Camera
 	Qt3DRender::QCamera * cameraEntity = view->camera();
 
@@ -192,13 +206,13 @@ MainWindowPrivate::createTree()
 	{
 		for( const auto & e : m_rootEntity->childNodes() )
 		{
-			if( e != m_lightEntity )
+			if( e != m_lightEntity && e != m_branchMaterial && e != m_leafMesh )
 				e->deleteLater();
 		}
 	}
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
-		true, true, m_rootEntity );
+		true, true, m_branchMaterial, m_leafMesh, m_rootEntity );
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
 	m_tree->placeLeafs();

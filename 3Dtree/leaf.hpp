@@ -30,6 +30,9 @@
 #include <QColor>
 
 
+class LeafMesh;
+
+
 //
 // Leaf
 //
@@ -43,6 +46,7 @@ class Leaf Q_DECL_FINAL
 public:
 	Leaf( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos,
+		LeafMesh * mesh,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Leaf();
 

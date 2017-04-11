@@ -28,6 +28,17 @@
 #include <QScopedPointer>
 #include <Qt3DCore/QTransform>
 
+QT_BEGIN_NAMESPACE
+
+namespace Qt3DExtras {
+	class QPhongMaterial;
+}
+
+QT_END_NAMESPACE
+
+
+class LeafMesh;
+
 
 //
 // Branch
@@ -43,6 +54,8 @@ public:
 	Branch( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
 		float parentRadius, bool continuation, bool isTree,
+		Qt3DExtras::QPhongMaterial * material,
+		LeafMesh * leafMesh,
 		Qt3DCore::QEntity * parent = Q_NULLPTR );
 	~Branch();
 

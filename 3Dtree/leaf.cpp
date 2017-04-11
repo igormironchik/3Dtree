@@ -49,8 +49,9 @@ using namespace Qt3DExtras;
 class LeafPrivate {
 public:
 	LeafPrivate( const QVector3D & startBranchPos,
-		const QVector3D & endBranchPos, Leaf * parent )
-		:	m_mesh( Q_NULLPTR )
+		const QVector3D & endBranchPos, LeafMesh * mesh,
+		Leaf * parent )
+		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_startBranchPos( startBranchPos )
@@ -63,7 +64,7 @@ public:
 	void init();
 
 	//! Mesh.
-	QScopedPointer< LeafMesh > m_mesh;
+	LeafMesh * m_mesh;
 	//! Material.
 	QScopedPointer< QPhongMaterial > m_material;
 	//! Transform.
@@ -79,15 +80,11 @@ public:
 void
 LeafPrivate::init()
 {
-	m_mesh.reset( new LeafMesh );
-
-	q->addComponent( m_mesh.data() );
+	q->addComponent( m_mesh );
 
 	m_material.reset( new QPhongMaterial );
 
-	//m_material->setAmbient( Qt::darkGreen );
 	m_material->setDiffuse( Qt::darkGreen );
-	//m_material->setSpecular( Qt::darkGreen );
 
 	q->addComponent( m_material.data() );
 
@@ -104,9 +101,10 @@ LeafPrivate::init()
 //
 
 Leaf::Leaf( const QVector3D & startBranchPos,
-	const QVector3D & endBranchPos, Qt3DCore::QNode * parent )
+	const QVector3D & endBranchPos, LeafMesh * mesh,
+	Qt3DCore::QNode * parent )
 	:	Qt3DCore::QEntity( parent )
-	,	d( new LeafPrivate( startBranchPos, endBranchPos, this ) )
+	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh, this ) )
 {
 	d->init();
 }
@@ -118,9 +116,7 @@ Leaf::~Leaf()
 void
 Leaf::setColor( const QColor & c )
 {
-	//d->m_material->setAmbient( c );
 	d->m_material->setDiffuse( c );
-	//d->m_material->setSpecular( c );
 }
 
 QColor

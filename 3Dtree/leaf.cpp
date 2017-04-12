@@ -22,7 +22,6 @@
 
 // 3Dtree include.
 #include "leaf.hpp"
-#include "leaf_mesh.hpp"
 #include "constants.hpp"
 
 // Qt include.

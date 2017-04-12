@@ -26,8 +26,6 @@
 #include "constants.hpp"
 #include "leaf_mesh.hpp"
 
-#include "leaf.hpp"
-
 // Qt include.
 #include <QPushButton>
 #include <QSpinBox>

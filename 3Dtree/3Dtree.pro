@@ -11,11 +11,13 @@ HEADERS = branch.hpp \
 	mainwindow.hpp \
     leaf_geometry.hpp \
     leaf_mesh.hpp \
-    constants.hpp
+    constants.hpp \
+	camera_controller.hpp
 
 SOURCES = branch.cpp \
 	leaf.cpp \
 	main.cpp \
 	mainwindow.cpp \
     leaf_geometry.cpp \
-    leaf_mesh.cpp
+    leaf_mesh.cpp \
+	camera_controller.cpp

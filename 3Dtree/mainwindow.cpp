@@ -25,6 +25,7 @@
 #include "branch.hpp"
 #include "constants.hpp"
 #include "leaf_mesh.hpp"
+#include "camera_controller.hpp"
 
 // Qt include.
 #include <QPushButton>
@@ -66,6 +67,7 @@ public:
 		,	m_lightEntity( Q_NULLPTR )
 		,	m_branchMaterial( Q_NULLPTR )
 		,	m_leafMesh( Q_NULLPTR )
+		,	m_control( Q_NULLPTR )
 		,	q( parent )
 	{
 	}
@@ -111,6 +113,8 @@ public:
 	Qt3DExtras::QPhongMaterial * m_branchMaterial;
 	//! Leaf mesh.
 	LeafMesh * m_leafMesh;
+	//! Camera controller.
+	CameraController * m_control;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -194,6 +198,8 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 
 	createTree();
 
+	m_control = new CameraController( cameraEntity, m_rootEntity );
+
 	view->setRootEntity( m_rootEntity );
 }
 
@@ -204,8 +210,9 @@ MainWindowPrivate::createTree()
 	{
 		for( const auto & e : m_rootEntity->childNodes() )
 		{
-			if( e != m_lightEntity && e != m_branchMaterial && e != m_leafMesh )
-				e->deleteLater();
+			if( e != m_lightEntity && e != m_branchMaterial
+				&& e != m_leafMesh && e != m_control )
+					e->deleteLater();
 		}
 	}
 

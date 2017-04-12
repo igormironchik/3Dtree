@@ -24,7 +24,6 @@
 #include "mainwindow.hpp"
 #include "branch.hpp"
 #include "constants.hpp"
-#include "leaf_mesh.hpp"
 #include "camera_controller.hpp"
 
 // Qt include.
@@ -38,6 +37,7 @@
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
+#include <Qt3DRender/QMesh>
 #include <Qt3DRender/QPointLight>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QPhongMaterial>
@@ -112,7 +112,7 @@ public:
 	//! Branch material.
 	Qt3DExtras::QPhongMaterial * m_branchMaterial;
 	//! Leaf mesh.
-	LeafMesh * m_leafMesh;
+	Qt3DRender::QMesh * m_leafMesh;
 	//! Camera controller.
 	CameraController * m_control;
 	//! Parent.
@@ -171,7 +171,8 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 
 	m_branchMaterial = new Qt3DExtras::QPhongMaterial( m_rootEntity );
 
-	m_leafMesh = new LeafMesh( m_rootEntity );
+	m_leafMesh = new Qt3DRender::QMesh( m_rootEntity );
+	m_leafMesh->setSource( QUrl( "qrc:/res/leaf.obj" ) );
 
 	m_branchMaterial->setDiffuse( Qt::darkGray );
 

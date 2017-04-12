@@ -34,10 +34,11 @@ namespace Qt3DExtras {
 	class QPhongMaterial;
 }
 
+namespace Qt3DRender {
+	class QMesh;
+}
+
 QT_END_NAMESPACE
-
-
-class LeafMesh;
 
 
 //
@@ -55,7 +56,7 @@ public:
 		const QVector3D & endParentPos,
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
-		LeafMesh * leafMesh,
+		Qt3DRender::QMesh * leafMesh,
 		Qt3DCore::QEntity * parent = Q_NULLPTR );
 	~Branch();
 

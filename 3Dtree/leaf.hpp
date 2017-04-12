@@ -29,8 +29,13 @@
 #include <QScopedPointer>
 #include <QColor>
 
+QT_BEGIN_NAMESPACE
 
-class LeafMesh;
+namespace Qt3DRender {
+	class QMesh;
+}
+
+QT_END_NAMESPACE
 
 
 //
@@ -46,7 +51,7 @@ class Leaf Q_DECL_FINAL
 public:
 	Leaf( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos,
-		LeafMesh * mesh,
+		Qt3DRender::QMesh * mesh,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Leaf();
 

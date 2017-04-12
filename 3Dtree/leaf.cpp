@@ -28,6 +28,7 @@
 // Qt include.
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DCore/QTransform>
+#include <Qt3DRender/QMesh>
 
 #include <QtMath>
 #include <QPixmap>
@@ -49,7 +50,7 @@ using namespace Qt3DExtras;
 class LeafPrivate {
 public:
 	LeafPrivate( const QVector3D & startBranchPos,
-		const QVector3D & endBranchPos, LeafMesh * mesh,
+		const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
 		Leaf * parent )
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
@@ -64,7 +65,7 @@ public:
 	void init();
 
 	//! Mesh.
-	LeafMesh * m_mesh;
+	Qt3DRender::QMesh * m_mesh;
 	//! Material.
 	QScopedPointer< QPhongMaterial > m_material;
 	//! Transform.
@@ -101,7 +102,7 @@ LeafPrivate::init()
 //
 
 Leaf::Leaf( const QVector3D & startBranchPos,
-	const QVector3D & endBranchPos, LeafMesh * mesh,
+	const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
 	Qt3DCore::QNode * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh, this ) )

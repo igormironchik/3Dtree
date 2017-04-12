@@ -66,7 +66,7 @@ public:
 		const QVector3D & endParentPos,
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
-		LeafMesh * leafMesh, Branch * parent )
+		Qt3DRender::QMesh * leafMesh, Branch * parent )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( material )
@@ -114,7 +114,7 @@ public:
 	//! Child branches.
 	QList< Branch* > m_children;
 	//! Leaf mesh.
-	LeafMesh * m_leafMesh;
+	Qt3DRender::QMesh * m_leafMesh;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -202,7 +202,7 @@ Branch::Branch( const QVector3D & startParentPos,
 	const QVector3D & endParentPos,
 	float parentRadius, bool continuation, bool isTree,
 	Qt3DExtras::QPhongMaterial * material,
-	LeafMesh * leafMesh,
+	Qt3DRender::QMesh * leafMesh,
 	Qt3DCore::QEntity * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos,

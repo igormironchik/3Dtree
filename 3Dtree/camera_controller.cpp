@@ -63,15 +63,15 @@ public:
 	//! Camera.
 	Qt3DRender::QCamera * m_camera;
 	//! Left mouse button action.
-	QScopedPointer< Qt3DInput::QAction > m_leftMouseButtonAction;
+	Qt3DInput::QAction * m_leftMouseButtonAction;
 	//! X axis.
-	QScopedPointer< Qt3DInput::QAxis > m_rxAxis;
+	Qt3DInput::QAxis * m_rxAxis;
 	//! Left mouse button input.
-	QScopedPointer< Qt3DInput::QActionInput > m_leftMouseButtonInput;
+	Qt3DInput::QActionInput * m_leftMouseButtonInput;
 	//! X analog axis input.
-	QScopedPointer< Qt3DInput::QAnalogAxisInput > m_mouseRxInput;
+	Qt3DInput::QAnalogAxisInput * m_mouseRxInput;
 	//! Mouse device.
-	QScopedPointer< Qt3DInput::QMouseDevice > m_mouseDevice;
+	Qt3DInput::QMouseDevice * m_mouseDevice;
 	//! Logical device.
 	QScopedPointer< Qt3DInput::QLogicalDevice > m_logicalDevice;
 	//! Frame action.
@@ -87,28 +87,28 @@ CameraControllerPrivate::init()
 
 	// Left Mouse Button Action
 	m_leftMouseButtonInput->setButtons( QVector<int>() << Qt::LeftButton );
-	m_leftMouseButtonInput->setSourceDevice( m_mouseDevice.data() );
-	m_leftMouseButtonAction->addInput( m_leftMouseButtonInput.data() );
+	m_leftMouseButtonInput->setSourceDevice( m_mouseDevice );
+	m_leftMouseButtonAction->addInput( m_leftMouseButtonInput );
 
 	//// Axes
 
 	// Mouse X
 	m_mouseRxInput->setAxis( Qt3DInput::QMouseDevice::X );
-	m_mouseRxInput->setSourceDevice( m_mouseDevice.data() );
-	m_rxAxis->addInput( m_mouseRxInput.data() );
+	m_mouseRxInput->setSourceDevice( m_mouseDevice );
+	m_rxAxis->addInput( m_mouseRxInput );
 
 	//// Logical Device
 
-	m_logicalDevice->addAction( m_leftMouseButtonAction.data() );
-	m_logicalDevice->addAxis( m_rxAxis.data() );
+	m_logicalDevice->addAction( m_leftMouseButtonAction );
+	m_logicalDevice->addAxis( m_rxAxis );
 
 	//// FrameAction
 
 	QObject::connect( m_frameAction.data(), &Qt3DLogic::QFrameAction::triggered,
 		q, &CameraController::_q_onTriggered );
 
-	q->addComponent( m_frameAction.data() );
-	q->addComponent( m_logicalDevice.data() );
+	q->addComponent( m_frameAction.take() );
+	q->addComponent( m_logicalDevice.take() );
 }
 
 

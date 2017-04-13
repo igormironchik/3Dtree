@@ -69,9 +69,9 @@ public:
 	//! Mesh.
 	Qt3DRender::QMesh * m_mesh;
 	//! Material.
-	QScopedPointer< QPhongMaterial > m_material;
+	QPhongMaterial * m_material;
 	//! Transform.
-	QScopedPointer< Qt3DCore::QTransform > m_transform;
+	Qt3DCore::QTransform * m_transform;
 	//! Start branch position.
 	const QVector3D * m_startBranchPos;
 	//! End branch position.
@@ -93,17 +93,21 @@ LeafPrivate::init()
 {
 	q->addComponent( m_mesh );
 
-	m_material.reset( new QPhongMaterial );
+	QScopedPointer< QPhongMaterial > material( new QPhongMaterial );
 
-	m_material->setDiffuse( Qt::darkGreen );
+	material->setDiffuse( Qt::darkGreen );
 
-	q->addComponent( m_material.data() );
+	m_material = material.data();
 
-	m_transform.reset( new Qt3DCore::QTransform );
+	q->addComponent( material.take() );
 
-	m_transform->setTranslation( *m_endBranchPos );
+	QScopedPointer< Qt3DCore::QTransform > transform( new Qt3DCore::QTransform );
 
-	q->addComponent( m_transform.data() );
+	transform->setTranslation( *m_endBranchPos );
+
+	m_transform = transform.data();
+
+	q->addComponent( transform.take() );
 }
 
 

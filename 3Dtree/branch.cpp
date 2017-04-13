@@ -91,9 +91,9 @@ public:
 	void placeOnTopAndParallel();
 
 	//! Mesh.
-	QScopedPointer< Qt3DExtras::QConeMesh > m_mesh;
+	Qt3DExtras::QConeMesh * m_mesh;
 	//! Transform.
-	QScopedPointer< Qt3DCore::QTransform > m_transform;
+	Qt3DCore::QTransform * m_transform;
 	//! Material.
 	Qt3DExtras::QPhongMaterial * m_material;
 	//! Start length.
@@ -127,7 +127,7 @@ public:
 void
 BranchPrivate::init()
 {
-	m_mesh.reset( new Qt3DExtras::QConeMesh );
+	QScopedPointer< Qt3DExtras::QConeMesh > coneMesh( new Qt3DExtras::QConeMesh );
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
@@ -137,31 +137,35 @@ BranchPrivate::init()
 	std::uniform_real_distribution< float > rdis( 0.0f, c_branchDistortion );
 
 	if( m_continuation )
-		m_mesh->setBottomRadius( m_parentRadius );
+		coneMesh->setBottomRadius( m_parentRadius );
 	else
-		m_mesh->setBottomRadius( m_parentRadius - rdis( gen ) );
+		coneMesh->setBottomRadius( m_parentRadius - rdis( gen ) );
 
-	m_mesh->setTopRadius( m_mesh->bottomRadius() - c_branchRadiusDelta );
+	coneMesh->setTopRadius( coneMesh->bottomRadius() - c_branchRadiusDelta );
 
-	m_mesh->setHasBottomEndcap( true );
-	m_mesh->setHasTopEndcap( true );
+	coneMesh->setHasBottomEndcap( true );
+	coneMesh->setHasTopEndcap( true );
 
 	m_length = c_branchLength + ldis( gen );
 
-	m_mesh->setLength( m_length );
+	coneMesh->setLength( m_length );
 
-	m_mesh->setRings( 20 );
-	m_mesh->setSlices( 10 );
+	coneMesh->setRings( 20 );
+	coneMesh->setSlices( 10 );
 
-	q->addComponent( m_mesh.data() );
+	m_mesh = coneMesh.data();
 
-	m_transform.reset( new Qt3DCore::QTransform );
+	q->addComponent( coneMesh.take() );
 
-	m_transform->setTranslation( m_endParentPos );
+	QScopedPointer< Qt3DCore::QTransform > transform( new Qt3DCore::QTransform );
+
+	transform->setTranslation( m_endParentPos );
 
 	m_endPos = m_startPos + QVector3D( 0.0f, m_mesh->length(), 0.0f );
 
-	q->addComponent( m_transform.data() );
+	m_transform = transform.data();
+
+	q->addComponent( transform.take() );
 
 	q->addComponent( m_material );
 

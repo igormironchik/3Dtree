@@ -77,7 +77,6 @@ public:
 
 	~MainWindowPrivate()
 	{
-		deleteTree();
 	}
 
 	//! Init.
@@ -110,19 +109,19 @@ public:
 	//! Tree grown.
 	bool m_grown;
 	//! Root entity.
-	QScopedPointer< Qt3DCore::QEntity > m_rootEntity;
+	Qt3DCore::QEntity * m_rootEntity;
 	//! Light.
-	QScopedPointer< Qt3DCore::QEntity > m_lightEntity;
+	Qt3DCore::QEntity * m_lightEntity;
 	//! Branch material.
-	QScopedPointer< Qt3DExtras::QPhongMaterial > m_branchMaterial;
+	Qt3DExtras::QPhongMaterial * m_branchMaterial;
 	//! Leaf mesh.
-	QScopedPointer< Qt3DRender::QMesh > m_leafMesh;
+	Qt3DRender::QMesh * m_leafMesh;
 	//! Camera controller.
-	QScopedPointer< CameraController > m_control;
+	CameraController * m_control;
 	//! Light point.
-	QScopedPointer< Qt3DRender::QPointLight > m_light;
+	Qt3DRender::QPointLight * m_light;
 	//! Light transform.
-	QScopedPointer< Qt3DCore::QTransform > m_lightTransform;
+	Qt3DCore::QTransform * m_lightTransform;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -178,11 +177,11 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 {
 	// Root entity
-	m_rootEntity.reset( new Qt3DCore::QEntity );
+	QScopedPointer< Qt3DCore::QEntity > root( new Qt3DCore::QEntity );
 
-	m_branchMaterial.reset( new Qt3DExtras::QPhongMaterial( m_rootEntity.data() ) );
+	m_branchMaterial = new Qt3DExtras::QPhongMaterial( root.data() );
 
-	m_leafMesh.reset( new Qt3DRender::QMesh( m_rootEntity.data() ) );
+	m_leafMesh = new Qt3DRender::QMesh( root.data() );
 	m_leafMesh->setSource( QUrl( "qrc:/res/leaf.obj" ) );
 
 	m_branchMaterial->setDiffuse( Qt::darkGray );
@@ -196,23 +195,25 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 	cameraEntity->setViewCenter( QVector3D( 0.0f, 5.0f, 0.0f ) );
 
-	m_lightEntity.reset( new Qt3DCore::QEntity( m_rootEntity.data() ) );
+	m_lightEntity = new Qt3DCore::QEntity( root.data() );
 
-	m_light.reset( new Qt3DRender::QPointLight( m_lightEntity.data() ) );
+	m_light = new Qt3DRender::QPointLight( m_lightEntity );
 	m_light->setColor( Qt::white );
 	m_light->setIntensity( 1.0f );
-	m_lightEntity->addComponent( m_light.data() );
+	m_lightEntity->addComponent( m_light );
 
-	m_lightTransform.reset( new Qt3DCore::QTransform(
-		m_lightEntity.data() ) );
+	m_lightTransform = new Qt3DCore::QTransform(
+		m_lightEntity );
 	m_lightTransform->setTranslation( cameraEntity->position() );
-	m_lightEntity->addComponent( m_lightTransform.data() );
+	m_lightEntity->addComponent( m_lightTransform );
+
+	m_control = new CameraController( cameraEntity, root.data() );
+
+	m_rootEntity = root.data();
 
 	createTree();
 
-	m_control.reset( new CameraController( cameraEntity, m_rootEntity.data() ) );
-
-	view->setRootEntity( m_rootEntity.data() );
+	view->setRootEntity( root.take() );
 }
 
 void
@@ -221,8 +222,8 @@ MainWindowPrivate::createTree()
 	deleteTree();
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
-		true, true, m_branchMaterial.data(), m_leafMesh.data(),
-		m_timer, m_rootEntity.data() );
+		true, true, m_branchMaterial, m_leafMesh,
+		m_timer, m_rootEntity );
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
 	m_tree->placeLeafs();
@@ -235,8 +236,8 @@ MainWindowPrivate::deleteTree()
 	{
 		for( const auto & e : m_rootEntity->childNodes() )
 		{
-			if( e != m_lightEntity.data() && e != m_branchMaterial.data()
-				&& e != m_leafMesh.data() && e != m_control.data() )
+			if( e != m_lightEntity && e != m_branchMaterial
+				&& e != m_leafMesh && e != m_control )
 					e->deleteLater();
 		}
 

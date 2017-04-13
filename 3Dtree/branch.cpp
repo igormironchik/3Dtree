@@ -66,7 +66,9 @@ public:
 		const QVector3D & endParentPos,
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
-		Qt3DRender::QMesh * leafMesh, Branch * parent )
+		Qt3DRender::QMesh * leafMesh,
+		QTimer * animationTimer,
+		Branch * parent )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( material )
@@ -78,6 +80,7 @@ public:
 		,	m_isTree( isTree )
 		,	m_startPos( endParentPos )
 		,	m_leafMesh( leafMesh )
+		,	m_animationTimer( animationTimer )
 		,	q( parent )
 	{
 	}
@@ -115,6 +118,8 @@ public:
 	QList< Branch* > m_children;
 	//! Leaf mesh.
 	Qt3DRender::QMesh * m_leafMesh;
+	//! Animation timer.
+	QTimer * m_animationTimer;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -168,7 +173,7 @@ BranchPrivate::init()
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
 		m_leafs.push_back( LeafData( new Leaf( m_startPos, m_endPos,
-			m_leafMesh, q->parentEntity() ) ) );
+			m_leafMesh, m_animationTimer, q->parentEntity() ) ) );
 		m_leafs.last().m_leaf->updatePosition();
 		m_leafs.last().m_leaf->setAge( 0.0f );
 	}
@@ -203,11 +208,12 @@ Branch::Branch( const QVector3D & startParentPos,
 	float parentRadius, bool continuation, bool isTree,
 	Qt3DExtras::QPhongMaterial * material,
 	Qt3DRender::QMesh * leafMesh,
+	QTimer * animationTimer,
 	Qt3DCore::QEntity * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos,
 			parentRadius, continuation, isTree, material,
-			leafMesh, this ) )
+			leafMesh, animationTimer, this ) )
 {
 	d->init();
 }
@@ -345,7 +351,7 @@ Branch::setAge( float age )
 		{
 			d->m_children.push_back( new Branch( startPos(),
 				endPos(), topRadius(), true, d->m_isTree, d->m_material,
-				d->m_leafMesh, parentEntity() ) );
+				d->m_leafMesh, d->m_animationTimer, parentEntity() ) );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
 		}
@@ -364,7 +370,8 @@ Branch::setAge( float age )
 		{
 			d->m_children.push_back( new Branch( startPos(),
 				endPos(), topRadius(), false, false,
-				d->m_material, d->m_leafMesh, parentEntity() ) );
+				d->m_material, d->m_leafMesh,
+				d->m_animationTimer, parentEntity() ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();

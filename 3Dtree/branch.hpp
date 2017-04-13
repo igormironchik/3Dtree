@@ -37,6 +37,8 @@ namespace Qt3DRender {
 	class QMesh;
 }
 
+class QTimer;
+
 QT_END_NAMESPACE
 
 
@@ -56,6 +58,7 @@ public:
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
 		Qt3DRender::QMesh * leafMesh,
+		QTimer * animationTimer,
 		Qt3DCore::QEntity * parent = Q_NULLPTR );
 	~Branch();
 

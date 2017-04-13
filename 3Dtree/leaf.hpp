@@ -35,6 +35,8 @@ namespace Qt3DRender {
 	class QMesh;
 }
 
+class QTimer;
+
 QT_END_NAMESPACE
 
 
@@ -54,6 +56,7 @@ public:
 	Leaf( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos,
 		Qt3DRender::QMesh * mesh,
+		QTimer * animationTimer,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Leaf();
 

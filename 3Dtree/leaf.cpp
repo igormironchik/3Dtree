@@ -51,13 +51,13 @@ class LeafPrivate {
 public:
 	LeafPrivate( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
-		Leaf * parent )
+		QTimer * animationTimer, Leaf * parent )
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_startBranchPos( &startBranchPos )
 		,	m_endBranchPos( &endBranchPos )
-		,	m_timer( Q_NULLPTR )
+		,	m_timer( animationTimer )
 		,	m_fallAngle( 0.0f )
 		,	q( parent )
 	{
@@ -113,9 +113,11 @@ LeafPrivate::init()
 
 Leaf::Leaf( const QVector3D & startBranchPos,
 	const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
+	QTimer * animationTimer,
 	Qt3DCore::QNode * parent )
 	:	Qt3DCore::QEntity( parent )
-	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh, this ) )
+	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh,
+			animationTimer, this ) )
 {
 	d->init();
 }
@@ -206,11 +208,6 @@ Leaf::rotate( float angle )
 void
 Leaf::fallAndDie()
 {
-	if( !d->m_timer )
-		d->m_timer = new QTimer( this );
-
-	d->m_timer->start( 100 );
-
 	d->m_fallVectorEndPos = *( d->m_endBranchPos );
 
 	d->m_fallVectorStartPos = *( d->m_endBranchPos ) - QVector3D( 0.0f, 0.5f, 0.0f );
@@ -227,11 +224,7 @@ void
 Leaf::timeout()
 {
 	if( d->m_endBranchPos->y() <= 0.0f )
-	{
-		d->m_timer->stop();
-
 		deleteLater();
-	}
 	else
 	{
 		rotate( d->m_fallAngle );

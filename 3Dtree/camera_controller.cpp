@@ -63,15 +63,15 @@ public:
 	//! Camera.
 	Qt3DRender::QCamera * m_camera;
 	//! Left mouse button action.
-	Qt3DInput::QAction * m_leftMouseButtonAction;
+	QScopedPointer< Qt3DInput::QAction > m_leftMouseButtonAction;
 	//! X axis.
-	Qt3DInput::QAxis * m_rxAxis;
+	QScopedPointer< Qt3DInput::QAxis > m_rxAxis;
 	//! Left mouse button input.
-	Qt3DInput::QActionInput * m_leftMouseButtonInput;
+	QScopedPointer< Qt3DInput::QActionInput > m_leftMouseButtonInput;
 	//! X analog axis input.
-	Qt3DInput::QAnalogAxisInput * m_mouseRxInput;
+	QScopedPointer< Qt3DInput::QAnalogAxisInput > m_mouseRxInput;
 	//! Mouse device.
-	Qt3DInput::QMouseDevice * m_mouseDevice;
+	QScopedPointer< Qt3DInput::QMouseDevice > m_mouseDevice;
 	//! Logical device.
 	QScopedPointer< Qt3DInput::QLogicalDevice > m_logicalDevice;
 	//! Frame action.
@@ -87,20 +87,20 @@ CameraControllerPrivate::init()
 
 	// Left Mouse Button Action
 	m_leftMouseButtonInput->setButtons( QVector<int>() << Qt::LeftButton );
-	m_leftMouseButtonInput->setSourceDevice( m_mouseDevice );
-	m_leftMouseButtonAction->addInput( m_leftMouseButtonInput );
+	m_leftMouseButtonInput->setSourceDevice( m_mouseDevice.data() );
+	m_leftMouseButtonAction->addInput( m_leftMouseButtonInput.data() );
 
 	//// Axes
 
 	// Mouse X
 	m_mouseRxInput->setAxis( Qt3DInput::QMouseDevice::X );
-	m_mouseRxInput->setSourceDevice( m_mouseDevice );
-	m_rxAxis->addInput( m_mouseRxInput );
+	m_mouseRxInput->setSourceDevice( m_mouseDevice.data() );
+	m_rxAxis->addInput( m_mouseRxInput.data() );
 
 	//// Logical Device
 
-	m_logicalDevice->addAction( m_leftMouseButtonAction );
-	m_logicalDevice->addAxis( m_rxAxis );
+	m_logicalDevice->addAction( m_leftMouseButtonAction.data() );
+	m_logicalDevice->addAxis( m_rxAxis.data() );
 
 	//// FrameAction
 

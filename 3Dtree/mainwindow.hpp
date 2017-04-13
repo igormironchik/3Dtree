@@ -47,7 +47,7 @@ class MainWindow Q_DECL_FINAL
 	:	public QWidget
 {
 public:
-	explicit MainWindow( Qt3DExtras::Qt3DWindow * view );
+	explicit MainWindow( QScopedPointer< Qt3DExtras::Qt3DWindow > & view );
 	~MainWindow();
 
 private slots:

@@ -48,6 +48,8 @@ class LeafPrivate;
 class Leaf Q_DECL_FINAL
 	:	public Qt3DCore::QEntity
 {
+	Q_OBJECT
+
 public:
 	Leaf( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos,
@@ -75,6 +77,10 @@ public:
 
 	//! Animate fall of the leaf.
 	void fallAndDie();
+
+private slots:
+	//! Timeout.
+	void timeout();
 
 private:
 	friend class LeafPrivate;

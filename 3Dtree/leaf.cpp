@@ -33,6 +33,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QLinearGradient>
+#include <QTimer>
 
 // C++ include.
 #include <cmath>
@@ -54,8 +55,10 @@ public:
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
-		,	m_startBranchPos( startBranchPos )
-		,	m_endBranchPos( endBranchPos )
+		,	m_startBranchPos( &startBranchPos )
+		,	m_endBranchPos( &endBranchPos )
+		,	m_timer( Q_NULLPTR )
+		,	m_fallAngle( 0.0f )
 		,	q( parent )
 	{
 	}
@@ -70,9 +73,17 @@ public:
 	//! Transform.
 	QScopedPointer< Qt3DCore::QTransform > m_transform;
 	//! Start branch position.
-	const QVector3D & m_startBranchPos;
+	const QVector3D * m_startBranchPos;
 	//! End branch position.
-	const QVector3D & m_endBranchPos;
+	const QVector3D * m_endBranchPos;
+	//! Timer.
+	QTimer * m_timer;
+	//! Fall vector.
+	QVector3D m_fallVectorStartPos;
+	//! Fall vector.
+	QVector3D m_fallVectorEndPos;
+	//! Fall rotate angle.
+	float m_fallAngle;
 	//! Parent.
 	Leaf * q;
 }; // class LeafPrivate
@@ -90,7 +101,7 @@ LeafPrivate::init()
 
 	m_transform.reset( new Qt3DCore::QTransform );
 
-	m_transform->setTranslation( m_endBranchPos );
+	m_transform->setTranslation( *m_endBranchPos );
 
 	q->addComponent( m_transform.data() );
 }
@@ -162,14 +173,14 @@ Leaf::setAge( float age )
 void
 Leaf::updatePosition()
 {
-	d->m_transform->setTranslation( d->m_endBranchPos );
+	d->m_transform->setTranslation( *( d->m_endBranchPos ) );
 }
 
 void
 Leaf::rotate( float angle )
 {
-	const QVector3D branch = ( d->m_endBranchPos -
-		d->m_startBranchPos ).normalized();
+	const QVector3D branch = ( *( d->m_endBranchPos ) -
+		*( d->m_startBranchPos ) ).normalized();
 	const QVector3D leaf( 0.0f, 1.0f, 0.0f );
 
 	QVector3D axis = QVector3D::crossProduct( branch, leaf );
@@ -190,4 +201,48 @@ Leaf::rotate( float angle )
 		axis, plainAngle, branch, angle );
 
 	d->m_transform->setRotation( quat );
+}
+
+void
+Leaf::fallAndDie()
+{
+	if( !d->m_timer )
+		d->m_timer = new QTimer( this );
+
+	d->m_timer->start( 100 );
+
+	d->m_fallVectorEndPos = *( d->m_endBranchPos );
+
+	d->m_fallVectorStartPos = *( d->m_endBranchPos ) - QVector3D( 0.0f, 0.5f, 0.0f );
+
+	d->m_startBranchPos = &( d->m_fallVectorStartPos );
+
+	d->m_endBranchPos = &( d->m_fallVectorEndPos );
+
+	connect( d->m_timer, &QTimer::timeout,
+		this, &Leaf::timeout );
+}
+
+void
+Leaf::timeout()
+{
+	if( d->m_endBranchPos->y() <= 0.0f )
+	{
+		d->m_timer->stop();
+
+		deleteLater();
+	}
+	else
+	{
+		rotate( d->m_fallAngle );
+
+		d->m_fallVectorEndPos -= QVector3D( 0.0f, 0.05f, 0.0f );
+
+		d->m_fallVectorStartPos = d->m_fallVectorEndPos -
+			QVector3D( 0.0f, 0.5f, 0.0f );
+
+		d->m_fallAngle += 15.0f;
+
+		updatePosition();
+	}
 }

@@ -313,7 +313,7 @@ Branch::setAge( float age )
 
 					if( autumn( gen ) > c_deepAutumn )
 					{
-						(*it).m_leaf->deleteLater();
+						(*it).m_leaf->fallAndDie();
 
 						(*it).m_deleted = true;
 					}
@@ -327,7 +327,7 @@ Branch::setAge( float age )
 				it != last; ++it )
 			{
 				if( !(*it).m_deleted )
-					(*it).m_leaf->deleteLater();
+					(*it).m_leaf->fallAndDie();
 			}
 
 			d->m_leafs.clear();

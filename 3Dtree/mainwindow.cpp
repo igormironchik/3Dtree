@@ -130,9 +130,10 @@ public:
 void
 MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 {
+	QWidget * container = QWidget::createWindowContainer( view.data(), q );
+
 	Qt3DExtras::Qt3DWindow * window = view.take();
 
-	QWidget * container = QWidget::createWindowContainer( window, q );
 	container->setMinimumSize( QSize( 768, 600 ) );
 	container->setMaximumSize( QSize( 768, 600 ) );
 

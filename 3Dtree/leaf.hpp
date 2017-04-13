@@ -25,11 +25,11 @@
 
 // Qt include.
 #include <Qt3DCore/QEntity>
-
 #include <QScopedPointer>
-#include <QColor>
 
 QT_BEGIN_NAMESPACE
+
+class QColor;
 
 namespace Qt3DRender {
 	class QMesh;
@@ -72,6 +72,9 @@ public:
 
 	//! \return Autumn's color.
 	static QColor autumnColor();
+
+	//! Animate fall of the leaf.
+	void fallAndDie();
 
 private:
 	friend class LeafPrivate;

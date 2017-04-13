@@ -41,6 +41,7 @@
 #include <Qt3DRender/QPointLight>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DExtras/Qt3DWindow>
 
 
 //! Grow timer in milliseconds.

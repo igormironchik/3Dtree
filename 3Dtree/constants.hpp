@@ -34,13 +34,9 @@
 //! Base scale for the leaf, i.e. when age is 1.0.
 static const float c_leafBaseScale = 0.25f;
 //! Base angle for the leaf plain to the orthogonal plain of the branch.
-static const float c_leafAngle = 90.0f;
+static const float c_leafAngle = 45.0f;
 //! Leaf rotation distortion.
 static const float c_leafRotationDistortion = 50.0f;
-//! Positive value of leaf vertex distortion.
-static const float c_positiveLeafDistortion = 0.05f;
-//! Negative value of leaf vertex distortion.
-static const float c_negativeLeafDistortion = - c_positiveLeafDistortion;
 //! Count of leafs.
 static const quint8 c_leafsCount = 2;
 
@@ -54,14 +50,14 @@ static const float c_branchDistortion = 0.01f;
 //! Delta of the branch radius.
 static const float c_branchRadiusDelta = 0.003f;
 //! Start branch radius.
-static const float c_startBranchRadius = 0.03f;
+static const float c_startBranchRadius = 0.035f;
 //! Branch length.
 static const float c_branchLength = 0.35f;
 //! Distortion of the branch length.
 static const float c_branchLengthDistortion = 0.15f;
 //! Max angle of the child branch.
-static const float c_maxBranchAngle = 35.0f;
-//! Count of child branches.
+static const float c_maxBranchAngle = 55.0f;
+//! Count of child branches. Can't be less than 1.
 static const quint8 c_childBranchesCount = 4;
 //! Should branch has continuation (parallel to parent) branch?
 static const bool c_hasContinuationBranch = true;

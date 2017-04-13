@@ -26,7 +26,6 @@
 // Qt include.
 #include <Qt3DCore/QEntity>
 #include <QScopedPointer>
-#include <Qt3DCore/QTransform>
 
 QT_BEGIN_NAMESPACE
 

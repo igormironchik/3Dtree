@@ -26,7 +26,14 @@
 // Qt include.
 #include <QWidget>
 #include <QScopedPointer>
-#include <Qt3DExtras/Qt3dWindow>
+
+QT_BEGIN_NAMESPACE
+
+namespace Qt3DExtras {
+	class Qt3DWindow;
+}
+
+QT_END_NAMESPACE
 
 
 //

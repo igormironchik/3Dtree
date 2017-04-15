@@ -108,6 +108,12 @@ LeafPrivate::init()
 	m_transform = transform.data();
 
 	q->addComponent( transform.take() );
+
+	std::random_device rd;
+	std::mt19937 gen( rd() );
+	std::uniform_real_distribution< float > dis( 0.0f, 360.0 );
+
+	m_fallAngle = dis( gen );
 }
 
 

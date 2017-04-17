@@ -42,6 +42,7 @@
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DExtras/Qt3DWindow>
+#include <Qt3DExtras/QSkyboxEntity>
 
 
 //! Grow timer in milliseconds.
@@ -71,6 +72,7 @@ public:
 		,	m_control( Q_NULLPTR )
 		,	m_light( Q_NULLPTR )
 		,	m_lightTransform( Q_NULLPTR )
+		,	m_skyBox( Q_NULLPTR )
 		,	q( parent )
 	{
 	}
@@ -122,6 +124,8 @@ public:
 	Qt3DRender::QPointLight * m_light;
 	//! Light transform.
 	Qt3DCore::QTransform * m_lightTransform;
+	//! Sky box.
+	Qt3DExtras::QSkyboxEntity * m_skyBox;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -184,7 +188,7 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	m_leafMesh = new Qt3DRender::QMesh( root.data() );
 	m_leafMesh->setSource( QUrl( "qrc:/res/leaf.obj" ) );
 
-	m_branchMaterial->setDiffuse( Qt::darkGray );
+	m_branchMaterial->setDiffuse( QColor( 41, 19, 0 ) );
 
 	// Camera
 	Qt3DRender::QCamera * cameraEntity = view->camera();
@@ -208,6 +212,15 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	m_lightEntity->addComponent( m_lightTransform );
 
 	m_control = new CameraController( cameraEntity, root.data() );
+
+	m_skyBox = new Qt3DExtras::QSkyboxEntity( root.data() );
+	m_skyBox->setBaseName( QStringLiteral( "qrc:/res/skybox" ) );
+	m_skyBox->setExtension( QStringLiteral( ".tga" ) );
+
+	Qt3DCore::QTransform * skyTransform = new Qt3DCore::QTransform( m_skyBox );
+	skyTransform->setTranslation( QVector3D( 0.0f, 0.124f, 0.0f ) );
+	skyTransform->setScale3D( QVector3D( 1.0f, 0.25f, 1.0f ) );
+	m_skyBox->addComponent( skyTransform );
 
 	m_rootEntity = root.data();
 
@@ -237,7 +250,8 @@ MainWindowPrivate::deleteTree()
 		for( const auto & e : m_rootEntity->childNodes() )
 		{
 			if( e != m_lightEntity && e != m_branchMaterial
-				&& e != m_leafMesh && e != m_control )
+				&& e != m_leafMesh && e != m_control &&
+				e != m_skyBox )
 					e->deleteLater();
 		}
 

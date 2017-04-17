@@ -1,5 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>res/leaf.obj</file>
+        <file>res/skybox_negx.tga</file>
+        <file>res/skybox_negy.tga</file>
+        <file>res/skybox_negz.tga</file>
+        <file>res/skybox_posx.tga</file>
+        <file>res/skybox_posy.tga</file>
+        <file>res/skybox_posz.tga</file>
     </qresource>
 </RCC>

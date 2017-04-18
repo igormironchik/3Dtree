@@ -217,9 +217,11 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	m_skyBox->setBaseName( QStringLiteral( "qrc:/res/skybox" ) );
 	m_skyBox->setExtension( QStringLiteral( ".tga" ) );
 
+	const float baseScale = 0.1f;
+
 	Qt3DCore::QTransform * skyTransform = new Qt3DCore::QTransform( m_skyBox );
-	skyTransform->setTranslation( QVector3D( 0.0f, 0.124f, 0.0f ) );
-	skyTransform->setScale3D( QVector3D( 1.0f, 0.25f, 1.0f ) );
+	skyTransform->setTranslation( QVector3D( 0.0f, baseScale / 8.0f - 0.001f, 0.0f ) );
+	skyTransform->setScale3D( QVector3D( baseScale, baseScale / 4.0f, baseScale ) );
 	m_skyBox->addComponent( skyTransform );
 
 	m_rootEntity = root.data();

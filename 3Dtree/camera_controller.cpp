@@ -48,8 +48,10 @@ public:
 		:	m_camera( camera )
 		,	m_leftMouseButtonAction( new Qt3DInput::QAction( parent ) )
 		,	m_rxAxis( new Qt3DInput::QAxis( parent ) )
+		,	m_tzAxis( new Qt3DInput::QAxis( parent ) )
 		,	m_leftMouseButtonInput( new Qt3DInput::QActionInput( parent ) )
 		,	m_mouseRxInput( new Qt3DInput::QAnalogAxisInput( parent ) )
+		,	m_mouseTzYInput( new Qt3DInput::QAnalogAxisInput( parent ) )
 		,	m_mouseDevice( new Qt3DInput::QMouseDevice( parent ) )
 		,	m_logicalDevice( new Qt3DInput::QLogicalDevice )
 		,	m_frameAction( new Qt3DLogic::QFrameAction )
@@ -66,10 +68,14 @@ public:
 	Qt3DInput::QAction * m_leftMouseButtonAction;
 	//! X axis.
 	Qt3DInput::QAxis * m_rxAxis;
+	//! Wheel Z axis.
+	Qt3DInput::QAxis * m_tzAxis;
 	//! Left mouse button input.
 	Qt3DInput::QActionInput * m_leftMouseButtonInput;
 	//! X analog axis input.
 	Qt3DInput::QAnalogAxisInput * m_mouseRxInput;
+	//! Mouse Y wheel input.
+	Qt3DInput::QAnalogAxisInput * m_mouseTzYInput;
 	//! Mouse device.
 	Qt3DInput::QMouseDevice * m_mouseDevice;
 	//! Logical device.
@@ -83,26 +89,23 @@ public:
 void
 CameraControllerPrivate::init()
 {
-	//// Actions
-
 	// Left Mouse Button Action
 	m_leftMouseButtonInput->setButtons( QVector<int>() << Qt::LeftButton );
 	m_leftMouseButtonInput->setSourceDevice( m_mouseDevice );
 	m_leftMouseButtonAction->addInput( m_leftMouseButtonInput );
-
-	//// Axes
 
 	// Mouse X
 	m_mouseRxInput->setAxis( Qt3DInput::QMouseDevice::X );
 	m_mouseRxInput->setSourceDevice( m_mouseDevice );
 	m_rxAxis->addInput( m_mouseRxInput );
 
-	//// Logical Device
+	m_mouseTzYInput->setAxis( Qt3DInput::QMouseDevice::WheelY );
+    m_mouseTzYInput->setSourceDevice( m_mouseDevice );
+    m_tzAxis->addInput( m_mouseTzYInput );
 
 	m_logicalDevice->addAction( m_leftMouseButtonAction );
 	m_logicalDevice->addAxis( m_rxAxis );
-
-	//// FrameAction
+	m_logicalDevice->addAxis( m_tzAxis );
 
 	QObject::connect( m_frameAction.data(), &Qt3DLogic::QFrameAction::triggered,
 		q, &CameraController::_q_onTriggered );
@@ -136,5 +139,13 @@ CameraController::_q_onTriggered( float )
 		d->m_camera->rotateAboutViewCenter(
 			Qt3DCore::QTransform::fromAxisAndAngle( 0.0f, 1.0f, 0.0f,
 				- d->m_rxAxis->value() ) );
+	}
+	else
+	{
+		const float z = d->m_tzAxis->value();
+
+		if( d->m_camera->position().length() > 15.0 || z < 0.0f )
+			d->m_camera->translate( QVector3D( 0.0f, 0.0f, z ),
+				Qt3DRender::QCamera::DontTranslateViewCenter );
 	}
 }

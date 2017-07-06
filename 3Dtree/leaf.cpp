@@ -111,7 +111,7 @@ LeafPrivate::init()
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
-	std::uniform_real_distribution< float > dis( 0.0f, 360.0 );
+	std::uniform_real_distribution< float > dis( 0.0f, 360.0f );
 
 	m_fallAngle = dis( gen );
 }

@@ -54,7 +54,7 @@ static const int c_growTimer = 100;
 
 class MainWindowPrivate {
 public:
-	MainWindowPrivate( MainWindow * parent )
+	explicit MainWindowPrivate( MainWindow * parent )
 		:	m_tree( Q_NULLPTR )
 		,	m_growSpeed( 1.0f / 60.0f / ( 1000.0f / (float) c_growTimer ) )
 		,	m_currentAge( 0.0f )

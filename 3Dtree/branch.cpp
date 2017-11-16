@@ -29,6 +29,7 @@
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QConeMesh>
 #include <Qt3DExtras/QPhongMaterial>
+#include <Qt3DRender/QMesh>
 
 #include <QList>
 #include <QtMath>
@@ -172,6 +173,10 @@ BranchPrivate::init()
 	// If this branch is continuation branch then place it on top and parallel.
 	if( m_continuation )
 		placeOnTopAndParallel();
+
+	if( c_useInstancedRendering )
+		m_leafMesh->setInstanceCount( m_leafMesh->instanceCount() +
+			c_leafsCount );
 
 	// Create leafs.
 	for( quint8 i = 0; i < c_leafsCount; ++i )

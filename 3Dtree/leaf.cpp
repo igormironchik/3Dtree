@@ -234,7 +234,12 @@ void
 Leaf::timeout()
 {
 	if( d->m_endBranchPos->y() <= 0.0f )
+	{
 		deleteLater();
+
+		if( c_useInstancedRendering )
+			d->m_mesh->setInstanceCount( d->m_mesh->instanceCount() - 1 );
+	}
 	else
 	{
 		rotate( d->m_fallAngle );

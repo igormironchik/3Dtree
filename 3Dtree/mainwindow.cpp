@@ -236,6 +236,9 @@ MainWindowPrivate::createTree()
 {
 	deleteTree();
 
+	if( c_useInstancedRendering )
+		m_leafMesh->setInstanceCount( 0 );
+
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
 		true, true, m_branchMaterial, m_leafMesh,
 		m_timer, m_rootEntity );

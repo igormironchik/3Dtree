@@ -55,11 +55,11 @@ static const quint8 c_leafsCount = 2;
 //! Distortion of the radius of branch.
 static const float c_branchDistortion = 0.01f;
 //! Delta of the branch radius.
-static const float c_branchRadiusDelta = 0.003f;
+static const float c_branchRadiusDelta = 0.01f;
 //! Start branch radius.
-static const float c_startBranchRadius = 0.035f;
+static const float c_startBranchRadius = 0.05f;
 //! Branch length.
-static const float c_branchLength = 0.35f;
+static const float c_branchLength = 0.50f;
 //! Distortion of the branch length.
 static const float c_branchLengthDistortion = 0.15f;
 //! Max angle of the child branch.
@@ -73,8 +73,10 @@ static const float c_branchRotationDistortion = 35.0f;
 //! How much branch should be longer after 100 years.
 static const float c_branchLengthMultiplicator = 50.0f;
 //! How slower should branch grow then tree.
-static const float c_branchSlower = 2.0f;
+static const float c_branchSlower = 4.0f;
 //! How much branch should be scaled after 100 years.
 static const float c_branchScale = 5.0f;
+//! How does first branch grow faster.
+static const float c_firstBranchGrowsFaster = 2.0f;
 
 #endif // TREE__CONSTANTS_HPP__INCLUDED

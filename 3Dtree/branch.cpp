@@ -69,7 +69,8 @@ public:
 		Qt3DExtras::QPhongMaterial * material,
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
-		Branch * parent )
+		Branch * parent,
+		bool firstBranch )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( material )
@@ -82,6 +83,7 @@ public:
 		,	m_startPos( endParentPos )
 		,	m_leafMesh( leafMesh )
 		,	m_animationTimer( animationTimer )
+		,	m_firstBranch( firstBranch )
 		,	q( parent )
 	{
 	}
@@ -121,6 +123,8 @@ public:
 	Qt3DRender::QMesh * m_leafMesh;
 	//! Animation timer.
 	QTimer * m_animationTimer;
+	//! Is this a first branch.
+	bool m_firstBranch;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -147,7 +151,7 @@ BranchPrivate::init()
 	coneMesh->setHasBottomEndcap( true );
 	coneMesh->setHasTopEndcap( true );
 
-	m_length = c_branchLength + ldis( gen );
+	m_length = c_branchLength + ( m_firstBranch ? 0.0f : ldis( gen ) );
 
 	coneMesh->setLength( m_length );
 
@@ -218,11 +222,12 @@ Branch::Branch( const QVector3D & startParentPos,
 	Qt3DExtras::QPhongMaterial * material,
 	Qt3DRender::QMesh * leafMesh,
 	QTimer * animationTimer,
-	Qt3DCore::QEntity * parent )
+	Qt3DCore::QEntity * parent,
+	bool firstBranch )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos,
 			parentRadius, continuation, isTree, material,
-			leafMesh, animationTimer, this ) )
+			leafMesh, animationTimer, this, firstBranch ) )
 {
 	d->init();
 }
@@ -267,8 +272,8 @@ Branch::setAge( float age )
 	for( ; tmp >= 1.0f; tmp -= 1.0f )
 		i += 1.0f;
 
-	if( tmp <= 0.5f )
-		tmp *= 2.0f;
+	if( tmp <= 0.25f )
+		tmp *= 4.0f;
 	else
 		tmp = 1.0f;
 
@@ -281,7 +286,10 @@ Branch::setAge( float age )
 
 	d->m_mesh->setLength( d->m_length +
 		d->m_length * summerAge / ( 100.0f / c_branchLengthMultiplicator ) /
-		( !d->m_isTree ? c_branchSlower : 1.0f ) );
+		// Tree trunk grows faster, branches grow slower.
+		( !d->m_isTree ? c_branchSlower : 1.0f ) *
+		// First tree trunk branch grows even faster.
+		( d->m_firstBranch ? c_firstBranchGrowsFaster : 1.0f ) );
 
 	updatePosition();
 

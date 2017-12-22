@@ -241,7 +241,7 @@ MainWindowPrivate::createTree()
 
 	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
 		true, true, m_branchMaterial, m_leafMesh,
-		m_timer, m_rootEntity );
+		m_timer, m_rootEntity, true );
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
 	m_tree->placeLeafs();

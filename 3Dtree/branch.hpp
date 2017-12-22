@@ -59,7 +59,8 @@ public:
 		Qt3DExtras::QPhongMaterial * material,
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
-		Qt3DCore::QEntity * parent = Q_NULLPTR );
+		Qt3DCore::QEntity * parent = Q_NULLPTR,
+		bool firstBranch = false );
 	~Branch();
 
 	//! Rotate on top of the parent.

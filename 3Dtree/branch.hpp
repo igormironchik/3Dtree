@@ -42,6 +42,9 @@ class QTimer;
 QT_END_NAMESPACE
 
 
+class Leaf;
+
+
 //
 // Branch
 //
@@ -55,10 +58,12 @@ class Branch Q_DECL_FINAL
 public:
 	Branch( const QVector3D & startParentPos,
 		const QVector3D & endParentPos,
+		quint16 & age,
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
+		Branch * parentBranch,
 		Qt3DCore::QEntity * parent = Q_NULLPTR,
 		bool firstBranch = false );
 	~Branch();
@@ -83,6 +88,12 @@ public:
 
 	//! \return Length.
 	float length() const;
+
+private slots:
+	//! Delete child from the list. This is not real deletion.
+	void childBranchDeleted();
+	//! Delete leaf. This is not real deletion.
+	void leafDeleted();
 
 protected:
 	//! Place leafs.

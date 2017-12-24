@@ -51,6 +51,11 @@ struct LeafData Q_DECL_FINAL {
 	{
 	}
 
+	bool operator == ( const LeafData & leaf ) const
+	{
+		return ( m_leaf == leaf.m_leaf );
+	}
+
 	Leaf * m_leaf;
 	bool m_autumn;
 	bool m_deleted;
@@ -64,12 +69,12 @@ struct LeafData Q_DECL_FINAL {
 class BranchPrivate {
 public:
 	BranchPrivate( const QVector3D & startParentPos,
-		const QVector3D & endParentPos,
+		const QVector3D & endParentPos, quint16 & age,
 		float parentRadius, bool continuation, bool isTree,
 		Qt3DExtras::QPhongMaterial * material,
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
-		Branch * parent,
+		Branch * parent, Branch * parentBranch,
 		bool firstBranch )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
@@ -77,6 +82,8 @@ public:
 		,	m_length( 0.0f )
 		,	m_startParentPos( startParentPos )
 		,	m_endParentPos( endParentPos )
+		,	m_treeAge( age )
+		,	m_age( 0 )
 		,	m_parentRadius( parentRadius )
 		,	m_continuation( continuation )
 		,	m_isTree( isTree )
@@ -84,8 +91,22 @@ public:
 		,	m_leafMesh( leafMesh )
 		,	m_animationTimer( animationTimer )
 		,	m_firstBranch( firstBranch )
+		,	m_parentBranch( parentBranch )
 		,	q( parent )
 	{
+	}
+
+	~BranchPrivate()
+	{
+		for( const auto * b : qAsConst( m_children ) )
+			delete b;
+
+		m_children.clear();
+
+		for( const auto & l : qAsConst( m_leafs ) )
+			delete l.m_leaf;
+
+		m_leafs.clear();
 	}
 
 	//! Init.
@@ -105,6 +126,10 @@ public:
 	const QVector3D & m_startParentPos;
 	//! End parent pos.
 	const QVector3D & m_endParentPos;
+	//! Age of the tree.
+	quint16 & m_treeAge;
+	//! Age of the branch.
+	quint16 m_age;
 	//! Parent radius.
 	float m_parentRadius;
 	//! Is this branch a continuation of the parent?
@@ -125,6 +150,8 @@ public:
 	QTimer * m_animationTimer;
 	//! Is this a first branch.
 	bool m_firstBranch;
+	//! Real parent.
+	Branch * m_parentBranch;
 	//! Parent.
 	Branch * q;
 }; // class BranchPrivate
@@ -186,9 +213,12 @@ BranchPrivate::init()
 	for( quint8 i = 0; i < c_leafsCount; ++i )
 	{
 		m_leafs.push_back( LeafData( new Leaf( m_startPos, m_endPos,
-			m_leafMesh, m_animationTimer, q->parentEntity() ) ) );
+			m_leafMesh, m_animationTimer, q, q->parentEntity() ) ) );
 		m_leafs.last().m_leaf->updatePosition();
 		m_leafs.last().m_leaf->setAge( 0.0f );
+
+		QObject::connect( m_leafs.last().m_leaf, &Leaf::nodeDestroyed,
+			q, &Branch::leafDeleted );
 	}
 }
 
@@ -217,17 +247,19 @@ BranchPrivate::placeOnTopAndParallel()
 //
 
 Branch::Branch( const QVector3D & startParentPos,
-	const QVector3D & endParentPos,
+	const QVector3D & endParentPos, quint16 & age,
 	float parentRadius, bool continuation, bool isTree,
 	Qt3DExtras::QPhongMaterial * material,
 	Qt3DRender::QMesh * leafMesh,
 	QTimer * animationTimer,
+	Branch * parentBranch,
 	Qt3DCore::QEntity * parent,
 	bool firstBranch )
 	:	Qt3DCore::QEntity( parent )
-	,	d( new BranchPrivate( startParentPos, endParentPos,
+	,	d( new BranchPrivate( startParentPos, endParentPos, age,
 			parentRadius, continuation, isTree, material,
-			leafMesh, animationTimer, this, firstBranch ) )
+			leafMesh, animationTimer, this, parentBranch,
+			firstBranch ) )
 {
 	d->init();
 }
@@ -266,6 +298,8 @@ Branch::rotate( float angle )
 void
 Branch::setAge( float age )
 {
+	d->m_age = static_cast< quint16 > ( qRound( age ) );
+
 	float tmp = age;
 	float i = 0.0f;
 
@@ -359,7 +393,9 @@ Branch::setAge( float age )
 
 	if( !d->m_children.isEmpty() )
 	{
-		for( const auto & b : qAsConst( d->m_children ) )
+		auto tmp = d->m_children;
+
+		for( const auto & b : qAsConst( tmp ) )
 			b->setAge( age - 1.0f );
 	}
 	else if( age >= 1.0f )
@@ -367,10 +403,15 @@ Branch::setAge( float age )
 		if( c_hasContinuationBranch )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), true, d->m_isTree, d->m_material,
-				d->m_leafMesh, d->m_animationTimer, parentEntity() ) );
+				endPos(), d->m_treeAge,
+				topRadius(), true, d->m_isTree, d->m_material,
+				d->m_leafMesh, d->m_animationTimer, this, parentEntity() ) );
+
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
+
+			connect( d->m_children.last(), &Branch::nodeDestroyed,
+				this, &Branch::childBranchDeleted );
 		}
 
 		const quint8 count = c_childBranchesCount -
@@ -386,15 +427,44 @@ Branch::setAge( float age )
 		for( quint8 i = 0; i < count; ++i )
 		{
 			d->m_children.push_back( new Branch( startPos(),
-				endPos(), topRadius(), false, false,
+				endPos(), d->m_treeAge, topRadius(), false, false,
 				d->m_material, d->m_leafMesh,
-				d->m_animationTimer, parentEntity() ) );
+				d->m_animationTimer, this, parentEntity() ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();
 			d->m_children.last()->setAge( 0.0f );
 
+			connect( d->m_children.last(), &Branch::nodeDestroyed,
+				this, &Branch::childBranchDeleted );
+
 			angle += 360.0f / (float) count;
+		}
+	}
+
+	// Death.
+	if( d->m_age > 1 )
+	{
+		if( d->m_age < c_minDeathThreeshold || d->m_age > c_maxDeathThreeshold )
+		{
+			std::random_device rd;
+			std::mt19937 gen( rd() );
+			std::normal_distribution< float > dis( 0.0f, 0.5f );
+
+			if( !d->m_isTree )
+			{
+				auto v = dis( gen );
+
+				if( v >= c_deathProbability )
+				{
+					for( const auto * b : qAsConst( d->m_children ) )
+						delete b;
+
+					d->m_children.clear();
+
+					deleteLater();
+				}
+			}
 		}
 	}
 }
@@ -456,4 +526,16 @@ float
 Branch::length() const
 {
 	return d->m_mesh->length() * d->m_transform->scale();
+}
+
+void
+Branch::childBranchDeleted()
+{
+	d->m_children.removeOne( static_cast< Branch* > ( sender() ) );
+}
+
+void
+Branch::leafDeleted()
+{
+	d->m_leafs.removeOne( LeafData( static_cast< Leaf* > ( sender() ) ) );
 }

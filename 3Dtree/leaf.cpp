@@ -23,6 +23,7 @@
 // 3Dtree include.
 #include "leaf.hpp"
 #include "constants.hpp"
+#include "branch.hpp"
 
 // Qt include.
 #include <Qt3DExtras/QPhongMaterial>
@@ -51,7 +52,7 @@ class LeafPrivate {
 public:
 	LeafPrivate( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
-		QTimer * animationTimer, Leaf * parent )
+		QTimer * animationTimer, Branch * parentBranch, Leaf * parent )
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
@@ -59,6 +60,7 @@ public:
 		,	m_endBranchPos( &endBranchPos )
 		,	m_timer( animationTimer )
 		,	m_fallAngle( 0.0f )
+		,	m_branch( parentBranch )
 		,	q( parent )
 	{
 	}
@@ -84,6 +86,8 @@ public:
 	QVector3D m_fallVectorEndPos;
 	//! Fall rotate angle.
 	float m_fallAngle;
+	//! Branch.
+	Branch * m_branch;
 	//! Parent.
 	Leaf * q;
 }; // class LeafPrivate
@@ -123,11 +127,11 @@ LeafPrivate::init()
 
 Leaf::Leaf( const QVector3D & startBranchPos,
 	const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
-	QTimer * animationTimer,
+	QTimer * animationTimer, Branch * parentBranch,
 	Qt3DCore::QNode * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh,
-			animationTimer, this ) )
+			animationTimer, parentBranch, this ) )
 {
 	d->init();
 }

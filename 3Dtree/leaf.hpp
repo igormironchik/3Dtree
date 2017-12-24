@@ -39,6 +39,8 @@ class QTimer;
 
 QT_END_NAMESPACE
 
+class Branch;
+
 
 //
 // Leaf
@@ -57,6 +59,7 @@ public:
 		const QVector3D & endBranchPos,
 		Qt3DRender::QMesh * mesh,
 		QTimer * animationTimer,
+		Branch * parentBranch,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Leaf();
 

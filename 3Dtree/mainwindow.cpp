@@ -60,6 +60,7 @@ public:
 		,	m_currentAge( 0.0f )
 		,	m_startPos( 0.0f, -0.5f, 0.0f )
 		,	m_endPos( 0.0f, 0.0f, 0.0f )
+		,	m_age( 0 )
 		,	m_years( Q_NULLPTR )
 		,	m_btn( Q_NULLPTR )
 		,	m_timer( Q_NULLPTR )
@@ -100,6 +101,8 @@ public:
 	QVector3D m_startPos;
 	//! End tree pos.
 	QVector3D m_endPos;
+	//! How old the tree?
+	quint16 m_age;
 	//! Years.
 	QSpinBox * m_years;
 	//! Pause/play button.
@@ -239,9 +242,14 @@ MainWindowPrivate::createTree()
 	if( c_useInstancedRendering )
 		m_leafMesh->setInstanceCount( 0 );
 
-	m_tree = new Branch( m_startPos, m_endPos, c_startBranchRadius,
-		true, true, m_branchMaterial, m_leafMesh,
-		m_timer, m_rootEntity, true );
+	m_age = 0;
+
+	m_tree = new Branch( m_startPos, m_endPos, m_age,
+		c_startBranchRadius,
+		true, true,
+		m_branchMaterial, m_leafMesh,
+		m_timer, Q_NULLPTR, m_rootEntity, true );
+
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
 	m_tree->placeLeafs();
@@ -252,13 +260,7 @@ MainWindowPrivate::deleteTree()
 {
 	if( m_tree )
 	{
-		for( const auto & e : m_rootEntity->childNodes() )
-		{
-			if( e != m_lightEntity && e != m_branchMaterial
-				&& e != m_leafMesh && e != m_control &&
-				e != m_skyBox )
-					e->deleteLater();
-		}
+		m_tree->deleteLater();
 
 		m_tree = Q_NULLPTR;
 	}

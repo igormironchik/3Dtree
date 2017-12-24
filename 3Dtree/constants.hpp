@@ -78,5 +78,12 @@ static const float c_branchSlower = 4.0f;
 static const float c_branchScale = 5.0f;
 //! How does first branch grow faster.
 static const float c_firstBranchGrowsFaster = 2.0f;
+//! Maximum age of the branch in youth when it can die.
+static const quint8 c_minDeathThreeshold = 5;
+//! Minimum age of the branch in old age when it can die.
+static const quint8 c_maxDeathThreeshold = 10;
+//! Probability of death of branch (greater value less
+//! probability, uses normal distribution with mean 0.0 and stddev 0.5)
+static const float c_deathProbability = 1.75f;
 
 #endif // TREE__CONSTANTS_HPP__INCLUDED

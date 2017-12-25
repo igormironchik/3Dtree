@@ -457,7 +457,6 @@ Branch::setAge( float age )
 
 				if( v >= c_deathProbability )
 				{
-					qDebug() << v;
 					for( const auto * b : qAsConst( d->m_children ) )
 						delete b;
 

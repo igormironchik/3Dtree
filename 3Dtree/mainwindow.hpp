@@ -55,6 +55,10 @@ private slots:
 	void buttonClicked();
 	//! Timer.
 	void timer();
+	//! Frame processed.
+	void frameProcessed( float );
+	//! Second timer.
+	void second();
 
 private:
 	friend class MainWindowPrivate;

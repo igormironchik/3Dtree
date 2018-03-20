@@ -34,6 +34,7 @@
 #include <QSpacerItem>
 #include <QLabel>
 #include <QTimer>
+#include <QFrame>
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
@@ -43,6 +44,7 @@
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DExtras/Qt3DWindow>
 #include <Qt3DExtras/QSkyboxEntity>
+#include <Qt3DLogic/QFrameAction>
 
 
 //! Grow timer in milliseconds.
@@ -64,6 +66,7 @@ public:
 		,	m_years( Q_NULLPTR )
 		,	m_btn( Q_NULLPTR )
 		,	m_timer( Q_NULLPTR )
+		,	m_secondTimer( Q_NULLPTR )
 		,	m_playing( true )
 		,	m_grown( false )
 		,	m_rootEntity( Q_NULLPTR )
@@ -74,6 +77,10 @@ public:
 		,	m_light( Q_NULLPTR )
 		,	m_lightTransform( Q_NULLPTR )
 		,	m_skyBox( Q_NULLPTR )
+		,	m_entityCounterLabel( Q_NULLPTR )
+		,	m_fpsLabel( Q_NULLPTR )
+		,	m_entityCounter( 0 )
+		,	m_fps( 1.0f )
 		,	q( parent )
 	{
 	}
@@ -109,6 +116,8 @@ public:
 	QPushButton * m_btn;
 	//! Timer.
 	QTimer * m_timer;
+	//! Second timer.
+	QTimer * m_secondTimer;
 	//! Playing?
 	bool m_playing;
 	//! Tree grown.
@@ -129,6 +138,14 @@ public:
 	Qt3DCore::QTransform * m_lightTransform;
 	//! Sky box.
 	Qt3DExtras::QSkyboxEntity * m_skyBox;
+	//! Entity counter label.
+	QLabel * m_entityCounterLabel;
+	//! FPS label.
+	QLabel * m_fpsLabel;
+	//! Entity counter.
+	quint64 m_entityCounter;
+	//! FPS.
+	float m_fps;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -164,6 +181,19 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_btn = new QPushButton( MainWindow::tr( "Pause" ), q );
 	v->addWidget( m_btn );
 
+	QFrame * line = new QFrame( q );
+	line->setFrameStyle( QFrame::HLine | QFrame::Sunken );
+	v->addWidget( line );
+
+	m_entityCounterLabel = new QLabel( q );
+	m_entityCounterLabel->setText( MainWindow::tr( "Entities Count: %1" )
+		.arg( m_entityCounter ) );
+	v->addWidget( m_entityCounterLabel );
+
+	m_fpsLabel = new QLabel( q );
+	m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( 0 ) );
+	v->addWidget( m_fpsLabel );
+
 	QSpacerItem * s = new QSpacerItem( 10, 10, QSizePolicy::Minimum,
 		QSizePolicy::Expanding );
 
@@ -173,6 +203,11 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_timer->setInterval( c_growTimer );
 	m_timer->start();
 
+	m_secondTimer = new QTimer( q );
+	m_secondTimer->start( 1000 );
+
+	MainWindow::connect( m_secondTimer, &QTimer::timeout,
+		q, &MainWindow::second );
 	MainWindow::connect( m_btn, &QPushButton::clicked,
 		q, &MainWindow::buttonClicked );
 	MainWindow::connect( m_timer, &QTimer::timeout,
@@ -185,6 +220,13 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 {
 	// Root entity
 	QScopedPointer< Qt3DCore::QEntity > root( new Qt3DCore::QEntity );
+
+	QScopedPointer< Qt3DLogic::QFrameAction > frameAction( new Qt3DLogic::QFrameAction );
+
+	QObject::connect( frameAction.data(), &Qt3DLogic::QFrameAction::triggered,
+		q, &MainWindow::frameProcessed );
+
+	root->addComponent( frameAction.take() );
 
 	m_branchMaterial = new Qt3DExtras::QPhongMaterial( root.data() );
 
@@ -251,7 +293,7 @@ MainWindowPrivate::createTree()
 		c_startBranchRadius,
 		true, true,
 		m_branchMaterial, m_leafMesh,
-		m_timer, Q_NULLPTR, m_rootEntity, true );
+		m_timer, Q_NULLPTR, m_entityCounter, m_rootEntity, true );
 
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
@@ -336,4 +378,21 @@ MainWindow::timer()
 	}
 	else if( d->m_tree )
 		d->m_tree->setAge( d->m_currentAge );
+
+	d->m_entityCounterLabel->setText( MainWindow::tr( "Entities Count: %1" )
+		.arg( d->m_entityCounter ) );
+}
+
+void
+MainWindow::frameProcessed( float )
+{
+	d->m_fps += 1.0f;
+}
+
+void
+MainWindow::second()
+{
+	d->m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( qRound( d->m_fps ) ) );
+
+	d->m_fps = 0.0f;
 }

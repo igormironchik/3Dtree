@@ -64,6 +64,7 @@ public:
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
 		Branch * parentBranch,
+		quint64 & entityCounter,
 		Qt3DCore::QEntity * parent = Q_NULLPTR,
 		bool firstBranch = false );
 	~Branch();

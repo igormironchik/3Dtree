@@ -52,7 +52,8 @@ class LeafPrivate {
 public:
 	LeafPrivate( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
-		QTimer * animationTimer, Branch * parentBranch, Leaf * parent )
+		QTimer * animationTimer, Branch * parentBranch, Leaf * parent,
+		quint64 & entityCounter )
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
@@ -62,7 +63,14 @@ public:
 		,	m_fallAngle( 0.0f )
 		,	m_branch( parentBranch )
 		,	q( parent )
+		,	m_entityCounter( entityCounter )
 	{
+		++m_entityCounter;
+	}
+
+	~LeafPrivate()
+	{
+		--m_entityCounter;
 	}
 
 	//! Init.
@@ -90,6 +98,8 @@ public:
 	Branch * m_branch;
 	//! Parent.
 	Leaf * q;
+	//! Entity counter.
+	quint64 & m_entityCounter;
 }; // class LeafPrivate
 
 void
@@ -127,11 +137,11 @@ LeafPrivate::init()
 
 Leaf::Leaf( const QVector3D & startBranchPos,
 	const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
-	QTimer * animationTimer, Branch * parentBranch,
+	QTimer * animationTimer, Branch * parentBranch, quint64 & entityCounter,
 	Qt3DCore::QNode * parent )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh,
-			animationTimer, parentBranch, this ) )
+			animationTimer, parentBranch, this, entityCounter ) )
 {
 	d->init();
 }

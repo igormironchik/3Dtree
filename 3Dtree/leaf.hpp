@@ -60,6 +60,7 @@ public:
 		Qt3DRender::QMesh * mesh,
 		QTimer * animationTimer,
 		Branch * parentBranch,
+		quint64 & entityCounter,
 		Qt3DCore::QNode * parent = Q_NULLPTR );
 	~Leaf();
 

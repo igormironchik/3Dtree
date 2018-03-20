@@ -202,11 +202,14 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	cameraEntity->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 	cameraEntity->setViewCenter( QVector3D( 0.0f, 5.0f, 0.0f ) );
 
+	cameraEntity->rotateAboutViewCenter(
+		Qt3DCore::QTransform::fromAxisAndAngle( 0.0f, 1.0f, 0.0f, 45.0f ) );
+
 	m_lightEntity = new Qt3DCore::QEntity( root.data() );
 
 	m_light = new Qt3DRender::QPointLight( m_lightEntity );
 	m_light->setColor( Qt::white );
-	m_light->setIntensity( 1.0f );
+	m_light->setIntensity( 1.5f );
 	m_lightEntity->addComponent( m_light );
 
 	m_lightTransform = new Qt3DCore::QTransform(

@@ -80,7 +80,7 @@ public:
 		,	m_entityCounterLabel( Q_NULLPTR )
 		,	m_fpsLabel( Q_NULLPTR )
 		,	m_entityCounter( 0 )
-		,	m_fps( 1.0f )
+		,	m_fps( 0 )
 		,	q( parent )
 	{
 	}
@@ -145,7 +145,7 @@ public:
 	//! Entity counter.
 	quint64 m_entityCounter;
 	//! FPS.
-	float m_fps;
+	int m_fps;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -386,13 +386,13 @@ MainWindow::timer()
 void
 MainWindow::frameProcessed( float )
 {
-	d->m_fps += 1.0f;
+	++d->m_fps;
 }
 
 void
 MainWindow::second()
 {
-	d->m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( qRound( d->m_fps ) ) );
+	d->m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( d->m_fps ) );
 
-	d->m_fps = 0.0f;
+	d->m_fps = 0;
 }

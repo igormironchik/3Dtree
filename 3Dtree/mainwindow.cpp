@@ -36,6 +36,7 @@
 #include <QTimer>
 #include <QFrame>
 #include <QVector>
+#include <QCheckBox>
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
@@ -70,7 +71,7 @@ public:
 		,	m_timer( Q_NULLPTR )
 		,	m_secondTimer( Q_NULLPTR )
 		,	m_playing( true )
-		,	m_grown( false )
+		,	m_grown( true )
 		,	m_rootEntity( Q_NULLPTR )
 		,	m_lightEntity( Q_NULLPTR )
 		,	m_branchMaterial( Q_NULLPTR )
@@ -82,8 +83,11 @@ public:
 		,	m_entityCounterLabel( Q_NULLPTR )
 		,	m_fpsLabel( Q_NULLPTR )
 		,	m_markLabel( Q_NULLPTR )
+		,	m_avgFpsLabel( Q_NULLPTR )
+		,	m_useInstanceRendering( Q_NULLPTR )
 		,	m_entityCounter( 0 )
 		,	m_fps( 0 )
+		,	m_secondsCounter( 0.0f )
 		,	m_totalFps( 0.0f )
 		,	m_totalEntitiesCount( 0.0f )
 		,	q( parent )
@@ -149,10 +153,16 @@ public:
 	QLabel * m_fpsLabel;
 	//! Mark label.
 	QLabel * m_markLabel;
+	//! Avg. FPS label.
+	QLabel * m_avgFpsLabel;
+	//! Use instance rendering?
+	QCheckBox * m_useInstanceRendering;
 	//! Entity counter.
 	quint64 m_entityCounter;
 	//! FPS.
 	int m_fps;
+	//! Seconds count.
+	double m_secondsCounter;
 	//! Total FPS.
 	double m_totalFps;
 	//! Total entities count.
@@ -189,7 +199,11 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_years->setValue( 5 );
 	l1->addWidget( m_years );
 
-	m_btn = new QPushButton( MainWindow::tr( "Pause" ), q );
+	m_useInstanceRendering = new QCheckBox( MainWindow::tr( "Use Instanced Rendering" ), q );
+	m_useInstanceRendering->setChecked( false );
+	v->addWidget( m_useInstanceRendering );
+
+	m_btn = new QPushButton( MainWindow::tr( "Play" ), q );
 	v->addWidget( m_btn );
 
 	QFrame * line = new QFrame( q );
@@ -208,6 +222,10 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_markLabel = new QLabel( q );
 	m_markLabel->setText( MainWindow::tr( "Avg. (FPS / Ent.C.) * Cur.Ent.C.: calculating..." ) );
 	v->addWidget( m_markLabel );
+
+	m_avgFpsLabel = new QLabel( q );
+	m_avgFpsLabel->setText( MainWindow::tr( "Avg. FPS: 0" ) );
+	v->addWidget( m_avgFpsLabel );
 
 	QSpacerItem * s = new QSpacerItem( 10, 10, QSizePolicy::Minimum,
 		QSizePolicy::Expanding );
@@ -289,8 +307,6 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 
 	m_rootEntity = root.data();
 
-	createTree();
-
 	view->setRootEntity( root.take() );
 }
 
@@ -299,8 +315,10 @@ MainWindowPrivate::createTree()
 {
 	deleteTree();
 
-	if( c_useInstancedRendering )
+	if( m_useInstanceRendering->isChecked() )
 		m_leafMesh->setInstanceCount( 0 );
+	else
+		m_leafMesh->setInstanceCount( 1 );
 
 	m_age = 0;
 
@@ -308,7 +326,8 @@ MainWindowPrivate::createTree()
 		c_startBranchRadius,
 		true, true,
 		m_branchMaterial, m_leafMesh,
-		m_timer, Q_NULLPTR, m_entityCounter, m_rootEntity, true );
+		m_timer, Q_NULLPTR, m_entityCounter, m_rootEntity, true,
+		m_useInstanceRendering->isChecked() );
 
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();
@@ -362,6 +381,7 @@ MainWindow::buttonClicked()
 
 		d->m_totalEntitiesCount = 0.0f;
 		d->m_totalFps = 0.0f;
+		d->m_secondsCounter = 0.0f;
 	}
 	else if( d->m_playing )
 	{
@@ -403,6 +423,9 @@ MainWindow::timer()
 		.arg( d->m_entityCounter ) );
 
 	calcMark();
+
+	d->m_avgFpsLabel->setText( MainWindow::tr( "Avg. FPS: %1" )
+		.arg( QString::number( d->m_totalFps / d->m_secondsCounter, 'f', 2 ) ) );
 }
 
 void
@@ -420,6 +443,8 @@ MainWindow::second()
 	d->m_totalFps += d->m_fps;
 
 	d->m_fps = 0;
+
+	d->m_secondsCounter += 1.0f;
 }
 
 void

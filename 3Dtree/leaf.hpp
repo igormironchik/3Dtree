@@ -61,7 +61,8 @@ public:
 		QTimer * animationTimer,
 		Branch * parentBranch,
 		quint64 & entityCounter,
-		Qt3DCore::QNode * parent = Q_NULLPTR );
+		Qt3DCore::QNode * parent = Q_NULLPTR,
+		bool useInstanceRendering = false );
 	~Leaf();
 
 	//! Set color.

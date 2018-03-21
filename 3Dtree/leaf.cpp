@@ -53,7 +53,7 @@ public:
 	LeafPrivate( const QVector3D & startBranchPos,
 		const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
 		QTimer * animationTimer, Branch * parentBranch, Leaf * parent,
-		quint64 & entityCounter )
+		quint64 & entityCounter, bool useInstanceRendering )
 		:	m_mesh( mesh )
 		,	m_material( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
@@ -64,6 +64,7 @@ public:
 		,	m_branch( parentBranch )
 		,	q( parent )
 		,	m_entityCounter( entityCounter )
+		,	m_useInstanceRendering( useInstanceRendering )
 	{
 		++m_entityCounter;
 	}
@@ -100,6 +101,8 @@ public:
 	Leaf * q;
 	//! Entity counter.
 	quint64 & m_entityCounter;
+	//! Use instance rendering?
+	bool m_useInstanceRendering;
 }; // class LeafPrivate
 
 void
@@ -138,10 +141,11 @@ LeafPrivate::init()
 Leaf::Leaf( const QVector3D & startBranchPos,
 	const QVector3D & endBranchPos, Qt3DRender::QMesh * mesh,
 	QTimer * animationTimer, Branch * parentBranch, quint64 & entityCounter,
-	Qt3DCore::QNode * parent )
+	Qt3DCore::QNode * parent, bool useInstanceRendering )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new LeafPrivate( startBranchPos, endBranchPos, mesh,
-			animationTimer, parentBranch, this, entityCounter ) )
+			animationTimer, parentBranch, this, entityCounter,
+			useInstanceRendering ) )
 {
 	d->init();
 }
@@ -251,7 +255,7 @@ Leaf::timeout()
 	{
 		deleteLater();
 
-		if( c_useInstancedRendering )
+		if( d->m_useInstanceRendering )
 			d->m_mesh->setInstanceCount( d->m_mesh->instanceCount() - 1 );
 	}
 	else

@@ -66,7 +66,8 @@ public:
 		Branch * parentBranch,
 		quint64 & entityCounter,
 		Qt3DCore::QEntity * parent = Q_NULLPTR,
-		bool firstBranch = false );
+		bool firstBranch = false,
+		bool useInstanceRendering = false );
 	~Branch();
 
 	//! Rotate on top of the parent.

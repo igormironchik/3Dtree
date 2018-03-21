@@ -26,13 +26,6 @@
 // Qt include.
 #include <QtGlobal>
 
-//
-// Global constants.
-//
-
-//! Use instanced rendering?
-static const bool c_useInstancedRendering = false;
-
 
 //
 // Leaf constants.

@@ -75,7 +75,8 @@ public:
 		Qt3DRender::QMesh * leafMesh,
 		QTimer * animationTimer,
 		Branch * parent, Branch * parentBranch,
-		bool firstBranch, quint64 & entityCounter )
+		bool firstBranch, quint64 & entityCounter,
+		bool useInstanceRendering )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( material )
@@ -91,6 +92,7 @@ public:
 		,	m_leafMesh( leafMesh )
 		,	m_animationTimer( animationTimer )
 		,	m_firstBranch( firstBranch )
+		,	m_useInstanceRendering( useInstanceRendering )
 		,	m_parentBranch( parentBranch )
 		,	q( parent )
 		,	m_entityCounter( entityCounter )
@@ -154,6 +156,8 @@ public:
 	QTimer * m_animationTimer;
 	//! Is this a first branch.
 	bool m_firstBranch;
+	//! Use instance rendering?
+	bool m_useInstanceRendering;
 	//! Real parent.
 	Branch * m_parentBranch;
 	//! Parent.
@@ -211,7 +215,7 @@ BranchPrivate::init()
 	if( m_continuation )
 		placeOnTopAndParallel();
 
-	if( c_useInstancedRendering )
+	if( m_useInstanceRendering )
 		m_leafMesh->setInstanceCount( m_leafMesh->instanceCount() +
 			c_leafsCount );
 
@@ -220,7 +224,7 @@ BranchPrivate::init()
 	{
 		m_leafs.push_back( LeafData( new Leaf( m_startPos, m_endPos,
 			m_leafMesh, m_animationTimer, q, m_entityCounter,
-			q->parentEntity() ) ) );
+			q->parentEntity(), m_useInstanceRendering ) ) );
 		m_leafs.last().m_leaf->updatePosition();
 		m_leafs.last().m_leaf->setAge( 0.0f );
 
@@ -262,12 +266,13 @@ Branch::Branch( const QVector3D & startParentPos,
 	Branch * parentBranch,
 	quint64 & entityCounter,
 	Qt3DCore::QEntity * parent,
-	bool firstBranch )
+	bool firstBranch,
+	bool useInstanceRendering )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos, age,
 			parentRadius, continuation, isTree, material,
 			leafMesh, animationTimer, this, parentBranch,
-			firstBranch, entityCounter ) )
+			firstBranch, entityCounter, useInstanceRendering ) )
 {
 	d->init();
 }
@@ -414,7 +419,7 @@ Branch::setAge( float age )
 				endPos(), d->m_treeAge,
 				topRadius(), true, d->m_isTree, d->m_material,
 				d->m_leafMesh, d->m_animationTimer, this, d->m_entityCounter,
-				parentEntity() ) );
+				parentEntity(), false, d->m_useInstanceRendering ) );
 
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
@@ -439,7 +444,7 @@ Branch::setAge( float age )
 				endPos(), d->m_treeAge, topRadius(), false, false,
 				d->m_material, d->m_leafMesh,
 				d->m_animationTimer, this, d->m_entityCounter,
-				parentEntity() ) );
+				parentEntity(), false, d->m_useInstanceRendering ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();

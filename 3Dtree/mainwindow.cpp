@@ -35,6 +35,7 @@
 #include <QLabel>
 #include <QTimer>
 #include <QFrame>
+#include <QVector>
 
 #include <Qt3DCore/QEntity>
 #include <Qt3DRender/QCamera>
@@ -49,6 +50,7 @@
 
 //! Grow timer in milliseconds.
 static const int c_growTimer = 100;
+
 
 //
 // MainWindowPrivate
@@ -79,8 +81,11 @@ public:
 		,	m_skyBox( Q_NULLPTR )
 		,	m_entityCounterLabel( Q_NULLPTR )
 		,	m_fpsLabel( Q_NULLPTR )
+		,	m_markLabel( Q_NULLPTR )
 		,	m_entityCounter( 0 )
 		,	m_fps( 0 )
+		,	m_totalFps( 0.0f )
+		,	m_totalEntitiesCount( 0.0f )
 		,	q( parent )
 	{
 	}
@@ -142,10 +147,16 @@ public:
 	QLabel * m_entityCounterLabel;
 	//! FPS label.
 	QLabel * m_fpsLabel;
+	//! Mark label.
+	QLabel * m_markLabel;
 	//! Entity counter.
 	quint64 m_entityCounter;
 	//! FPS.
 	int m_fps;
+	//! Total FPS.
+	double m_totalFps;
+	//! Total entities count.
+	double m_totalEntitiesCount;
 	//! Parent.
 	MainWindow * q;
 }; // class MainWindowPrivate
@@ -193,6 +204,10 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_fpsLabel = new QLabel( q );
 	m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( 0 ) );
 	v->addWidget( m_fpsLabel );
+
+	m_markLabel = new QLabel( q );
+	m_markLabel->setText( MainWindow::tr( "Avg. (FPS / Ent.C.) * Cur.Ent.C.: calculating..." ) );
+	v->addWidget( m_markLabel );
 
 	QSpacerItem * s = new QSpacerItem( 10, 10, QSizePolicy::Minimum,
 		QSizePolicy::Expanding );
@@ -342,6 +357,11 @@ MainWindow::buttonClicked()
 		d->createTree();
 
 		d->m_timer->start();
+
+		d->m_markLabel->setText( MainWindow::tr( "Avg. (FPS / Ent.C.) * Cur.Ent.C.: calculating..." ) );
+
+		d->m_totalEntitiesCount = 0.0f;
+		d->m_totalFps = 0.0f;
 	}
 	else if( d->m_playing )
 	{
@@ -381,6 +401,8 @@ MainWindow::timer()
 
 	d->m_entityCounterLabel->setText( MainWindow::tr( "Entities Count: %1" )
 		.arg( d->m_entityCounter ) );
+
+	calcMark();
 }
 
 void
@@ -394,5 +416,17 @@ MainWindow::second()
 {
 	d->m_fpsLabel->setText( MainWindow::tr( "FPS: %1" ).arg( d->m_fps ) );
 
+	d->m_totalEntitiesCount += d->m_entityCounter;
+	d->m_totalFps += d->m_fps;
+
 	d->m_fps = 0;
+}
+
+void
+MainWindow::calcMark()
+{
+	const double mark = ( d->m_totalFps / d->m_totalEntitiesCount ) * d->m_entityCounter;
+
+	d->m_markLabel->setText( MainWindow::tr( "Avg. (FPS / Ent.C.) * Cur.Ent.C.: %1" )
+		.arg( QString::number( mark, 'f', 2 ) ) );
 }

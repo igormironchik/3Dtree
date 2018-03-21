@@ -59,6 +59,8 @@ private slots:
 	void frameProcessed( float );
 	//! Second timer.
 	void second();
+	//! Calculate mark.
+	void calcMark();
 
 private:
 	friend class MainWindowPrivate;

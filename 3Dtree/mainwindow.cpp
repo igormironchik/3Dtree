@@ -85,6 +85,7 @@ public:
 		,	m_markLabel( Q_NULLPTR )
 		,	m_avgFpsLabel( Q_NULLPTR )
 		,	m_useInstanceRendering( Q_NULLPTR )
+		,	m_enableDeath( Q_NULLPTR )
 		,	m_entityCounter( 0 )
 		,	m_fps( 0 )
 		,	m_secondsCounter( 0.0f )
@@ -157,6 +158,8 @@ public:
 	QLabel * m_avgFpsLabel;
 	//! Use instance rendering?
 	QCheckBox * m_useInstanceRendering;
+	//! Enable death?
+	QCheckBox * m_enableDeath;
 	//! Entity counter.
 	quint64 m_entityCounter;
 	//! FPS.
@@ -202,6 +205,10 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 	m_useInstanceRendering = new QCheckBox( MainWindow::tr( "Use Instanced Rendering" ), q );
 	m_useInstanceRendering->setChecked( false );
 	v->addWidget( m_useInstanceRendering );
+
+	m_enableDeath = new QCheckBox( MainWindow::tr( "Enable Death" ), q );
+	m_enableDeath->setChecked( true );
+	v->addWidget( m_enableDeath );
 
 	m_btn = new QPushButton( MainWindow::tr( "Play" ), q );
 	v->addWidget( m_btn );
@@ -327,7 +334,8 @@ MainWindowPrivate::createTree()
 		true, true,
 		m_branchMaterial, m_leafMesh,
 		m_timer, Q_NULLPTR, m_entityCounter, m_rootEntity, true,
-		m_useInstanceRendering->isChecked() );
+		m_useInstanceRendering->isChecked(),
+		m_enableDeath->isChecked() );
 
 	m_tree->setAge( 0.0f );
 	m_tree->updatePosition();

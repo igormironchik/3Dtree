@@ -76,7 +76,7 @@ public:
 		QTimer * animationTimer,
 		Branch * parent, Branch * parentBranch,
 		bool firstBranch, quint64 & entityCounter,
-		bool useInstanceRendering )
+		bool useInstanceRendering, bool enableDeath )
 		:	m_mesh( Q_NULLPTR )
 		,	m_transform( Q_NULLPTR )
 		,	m_material( material )
@@ -93,6 +93,7 @@ public:
 		,	m_animationTimer( animationTimer )
 		,	m_firstBranch( firstBranch )
 		,	m_useInstanceRendering( useInstanceRendering )
+		,	m_enableDeath( enableDeath )
 		,	m_parentBranch( parentBranch )
 		,	q( parent )
 		,	m_entityCounter( entityCounter )
@@ -158,6 +159,8 @@ public:
 	bool m_firstBranch;
 	//! Use instance rendering?
 	bool m_useInstanceRendering;
+	//! Enable death?
+	bool m_enableDeath;
 	//! Real parent.
 	Branch * m_parentBranch;
 	//! Parent.
@@ -267,12 +270,13 @@ Branch::Branch( const QVector3D & startParentPos,
 	quint64 & entityCounter,
 	Qt3DCore::QEntity * parent,
 	bool firstBranch,
-	bool useInstanceRendering )
+	bool useInstanceRendering,
+	bool enableDeath )
 	:	Qt3DCore::QEntity( parent )
 	,	d( new BranchPrivate( startParentPos, endParentPos, age,
 			parentRadius, continuation, isTree, material,
 			leafMesh, animationTimer, this, parentBranch,
-			firstBranch, entityCounter, useInstanceRendering ) )
+			firstBranch, entityCounter, useInstanceRendering, enableDeath ) )
 {
 	d->init();
 }
@@ -419,7 +423,8 @@ Branch::setAge( float age )
 				endPos(), d->m_treeAge,
 				topRadius(), true, d->m_isTree, d->m_material,
 				d->m_leafMesh, d->m_animationTimer, this, d->m_entityCounter,
-				parentEntity(), false, d->m_useInstanceRendering ) );
+				parentEntity(), false, d->m_useInstanceRendering,
+				d->m_enableDeath ) );
 
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->setAge( 0.0f );
@@ -444,7 +449,8 @@ Branch::setAge( float age )
 				endPos(), d->m_treeAge, topRadius(), false, false,
 				d->m_material, d->m_leafMesh,
 				d->m_animationTimer, this, d->m_entityCounter,
-				parentEntity(), false, d->m_useInstanceRendering ) );
+				parentEntity(), false, d->m_useInstanceRendering,
+				d->m_enableDeath ) );
 			d->m_children.last()->rotate( angle );
 			d->m_children.last()->updatePosition();
 			d->m_children.last()->placeLeafs();
@@ -458,7 +464,7 @@ Branch::setAge( float age )
 	}
 
 	// Death.
-	if( d->m_age > 1 )
+	if( d->m_enableDeath && d->m_age > 1 )
 	{
 		if( d->m_age < c_minDeathThreeshold || d->m_age > c_maxDeathThreeshold )
 		{

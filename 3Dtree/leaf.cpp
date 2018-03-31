@@ -65,6 +65,9 @@ public:
 		,	q( parent )
 		,	m_entityCounter( entityCounter )
 		,	m_useInstanceRendering( useInstanceRendering )
+		,	m_startBranchRot( 0.0f )
+		,	m_leafDistRot( -1.0f )
+		,	m_fallAndDie( false )
 	{
 		++m_entityCounter;
 	}
@@ -103,6 +106,12 @@ public:
 	quint64 & m_entityCounter;
 	//! Use instance rendering?
 	bool m_useInstanceRendering;
+	//! Start rotation around branch vector.
+	float m_startBranchRot;
+	//! Distortion of rotation around leaf normal.
+	float m_leafDistRot;
+	//! Fall and die mode?
+	bool m_fallAndDie;
 }; // class LeafPrivate
 
 void
@@ -204,11 +213,20 @@ void
 Leaf::updatePosition()
 {
 	d->m_transform->setTranslation( *( d->m_endBranchPos ) );
+
+	rotate( d->m_startBranchRot );
+}
+
+static inline bool lessZero( const QVector3D & v )
+{
+	return ( v.x() < 0.0f || v.y() < 0.0f || v.z() < 0.0f );
 }
 
 void
 Leaf::rotate( float angle )
 {
+	d->m_startBranchRot = angle;
+
 	QVector3D branch = ( *( d->m_endBranchPos ) -
 		*( d->m_startBranchPos ) ).normalized();
 
@@ -217,22 +235,27 @@ Leaf::rotate( float angle )
 
 	const QVector3D leaf( 0.0f, 1.0f, 0.0f );
 
-	QVector3D axis = QVector3D::crossProduct( branch, leaf );
-
-	if( axis.isNull() )
-		axis = QVector3D(  1.0f, 0.0f, 0.0f );
+	const QVector3D axis = QVector3D::crossProduct( branch, leaf );
 
 	const float cosPlainAngle = QVector3D::dotProduct( branch, leaf );
 
-	std::random_device rd;
-	std::mt19937 gen( rd() );
-	std::uniform_real_distribution< float > dis( 0.0f, c_leafAngle );
+	if( d->m_leafDistRot < 0.0f || d->m_fallAndDie )
+	{
+		std::random_device rd;
+		std::mt19937 gen( rd() );
+		std::uniform_real_distribution< float > dis( 0.0f, c_leafAngle );
 
-	const float plainAngle = qRadiansToDegrees( std::acos( cosPlainAngle ) ) +
-		dis( gen );
+		d->m_leafDistRot = dis( gen );
+	}
+
+	float plainAngle = qRadiansToDegrees( std::acos( cosPlainAngle ) );
+
+	if( lessZero( branch ) )
+		plainAngle = -plainAngle;
 
 	const QQuaternion quat = Qt3DCore::QTransform::fromAxesAndAngles(
-		axis, plainAngle, branch, angle );
+		axis, plainAngle, QVector3D::crossProduct( branch, QVector3D( 0.0f, 0.0f, 1.0f ) ),
+		d->m_leafDistRot, branch, angle );
 
 	d->m_transform->setRotation( quat );
 }
@@ -240,6 +263,8 @@ Leaf::rotate( float angle )
 void
 Leaf::fallAndDie()
 {
+	d->m_fallAndDie = true;
+
 	d->m_fallVectorEndPos = *( d->m_endBranchPos );
 
 	d->m_fallVectorStartPos = *( d->m_endBranchPos ) - QVector3D( 0.0f, 0.5f, 0.0f );

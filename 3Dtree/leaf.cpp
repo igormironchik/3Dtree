@@ -209,8 +209,12 @@ Leaf::updatePosition()
 void
 Leaf::rotate( float angle )
 {
-	const QVector3D branch = ( *( d->m_endBranchPos ) -
+	QVector3D branch = ( *( d->m_endBranchPos ) -
 		*( d->m_startBranchPos ) ).normalized();
+
+	if( branch.isNull() )
+		branch = QVector3D( 0.0f, 1.0f, 0.0f );
+
 	const QVector3D leaf( 0.0f, 1.0f, 0.0f );
 
 	QVector3D axis = QVector3D::crossProduct( branch, leaf );

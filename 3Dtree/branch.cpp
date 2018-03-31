@@ -427,6 +427,7 @@ Branch::setAge( float age )
 				d->m_enableDeath ) );
 
 			d->m_children.last()->updatePosition();
+			d->m_children.last()->placeLeafs();
 			d->m_children.last()->setAge( 0.0f );
 
 			connect( d->m_children.last(), &Branch::nodeDestroyed,

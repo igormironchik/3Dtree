@@ -246,8 +246,10 @@ Leaf::rotate( float angle )
 	float plainAngle = qRadiansToDegrees( std::acos( cosPlainAngle ) );
 
 	const QQuaternion quat = Qt3DCore::QTransform::fromAxesAndAngles(
-		axis, plainAngle, QVector3D::crossProduct( branch, QVector3D( 0.0f, 0.0f, 1.0f ) ),
-		d->m_leafDistRot, branch, angle );
+		axis, plainAngle,
+		QVector3D::crossProduct( branch, QVector3D( 0.0f, 0.0f, 1.0f ) ).normalized(),
+		d->m_leafDistRot,
+		branch, angle );
 
 	d->m_transform->setRotation( quat );
 }

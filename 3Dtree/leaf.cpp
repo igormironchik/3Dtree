@@ -217,11 +217,6 @@ Leaf::updatePosition()
 	rotate( d->m_startBranchRot );
 }
 
-static inline bool lessZero( const QVector3D & v )
-{
-	return ( v.x() < 0.0f || v.y() < 0.0f || v.z() < 0.0f );
-}
-
 void
 Leaf::rotate( float angle )
 {
@@ -235,9 +230,9 @@ Leaf::rotate( float angle )
 
 	const QVector3D leaf( 0.0f, 1.0f, 0.0f );
 
-	const QVector3D axis = QVector3D::crossProduct( branch, leaf );
+	const QVector3D axis = QVector3D::crossProduct( leaf, branch ).normalized();
 
-	const float cosPlainAngle = QVector3D::dotProduct( branch, leaf );
+	const float cosPlainAngle = QVector3D::dotProduct( leaf, branch );
 
 	if( d->m_leafDistRot < 0.0f || d->m_fallAndDie )
 	{
@@ -249,9 +244,6 @@ Leaf::rotate( float angle )
 	}
 
 	float plainAngle = qRadiansToDegrees( std::acos( cosPlainAngle ) );
-
-	if( lessZero( branch ) )
-		plainAngle = -plainAngle;
 
 	const QQuaternion quat = Qt3DCore::QTransform::fromAxesAndAngles(
 		axis, plainAngle, QVector3D::crossProduct( branch, QVector3D( 0.0f, 0.0f, 1.0f ) ),

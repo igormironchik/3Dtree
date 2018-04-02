@@ -292,18 +292,18 @@ Branch::rotate( float angle )
 		.normalized();
 	const QVector3D b( 0.0f, 1.0f, 0.0f );
 
-	QVector3D axis = QVector3D::crossProduct( parent, b );
+	QVector3D axis = QVector3D::crossProduct( b, parent ).normalized();
 
 	if( axis.isNull() )
 		axis = QVector3D( 1.0f, 0.0f, 0.0f );
 
-	const float cosAngle = QVector3D::dotProduct( parent, b );
+	const float cosAngle = QVector3D::dotProduct( b, parent );
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
 	std::uniform_real_distribution< float > dis( 0.0f, c_maxBranchAngle );
 
-	const float plainAngle = 90.0f - qRadiansToDegrees( std::acos( cosAngle ) )
+	const float plainAngle = qRadiansToDegrees( std::acos( cosAngle ) ) + 90.0f
 		- dis( gen );
 
 	const QQuaternion q = Qt3DCore::QTransform::fromAxesAndAngles( axis,

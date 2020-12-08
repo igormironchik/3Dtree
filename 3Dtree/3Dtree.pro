@@ -4,7 +4,7 @@ TEMPLATE = app
 CONFIG += c++14
 
 QT += widgets core gui \
-    3dcore 3drender 3dinput 3dextras
+    3dcore 3drender 3dinput 3dextras 3dlogic
 
 RESOURCES = resources.qrc
 

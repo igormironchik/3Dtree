@@ -37,6 +37,7 @@
 // C++ include.
 #include <random>
 #include <cmath>
+#include <memory>
 
 
 //
@@ -172,7 +173,7 @@ public:
 void
 BranchPrivate::init()
 {
-	QScopedPointer< Qt3DExtras::QConeMesh > coneMesh( new Qt3DExtras::QConeMesh );
+	auto coneMesh = std::make_unique< Qt3DExtras::QConeMesh > ();
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
@@ -198,19 +199,19 @@ BranchPrivate::init()
 	coneMesh->setRings( 20 );
 	coneMesh->setSlices( 10 );
 
-	m_mesh = coneMesh.data();
+	m_mesh = coneMesh.get();
 
-	q->addComponent( coneMesh.take() );
+	q->addComponent( coneMesh.release() );
 
-	QScopedPointer< Qt3DCore::QTransform > transform( new Qt3DCore::QTransform );
+	auto transform = std::make_unique< Qt3DCore::QTransform > ();
 
 	transform->setTranslation( m_endParentPos );
 
 	m_endPos = m_startPos + QVector3D( 0.0f, m_mesh->length(), 0.0f );
 
-	m_transform = transform.data();
+	m_transform = transform.get();
 
-	q->addComponent( transform.take() );
+	q->addComponent( transform.release() );
 
 	q->addComponent( m_material );
 
@@ -497,13 +498,13 @@ Branch::updatePosition()
 	d->m_transform->setTranslation( d->m_endParentPos );
 
 	QVector3D end = QVector3D( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
-	end = d->m_transform->matrix() * end;
+	end = d->m_transform->matrix().map( end );
 
 	d->m_transform->setTranslation( end );
 
 	const QVector3D tmp( 0.0f, d->m_mesh->length() / 2.0f, 0.0f );
 
-	d->m_endPos = d->m_transform->matrix() * tmp;
+	d->m_endPos = d->m_transform->matrix().map( tmp );
 }
 
 void

@@ -79,9 +79,9 @@ public:
 	//! Mouse device.
 	Qt3DInput::QMouseDevice * m_mouseDevice;
 	//! Logical device.
-	QScopedPointer< Qt3DInput::QLogicalDevice > m_logicalDevice;
+	std::unique_ptr< Qt3DInput::QLogicalDevice > m_logicalDevice;
 	//! Frame action.
-	QScopedPointer< Qt3DLogic::QFrameAction > m_frameAction;
+	std::unique_ptr< Qt3DLogic::QFrameAction > m_frameAction;
 	//! Parent.
 	CameraController * q;
 }; // class CameraControllerPrivate
@@ -107,11 +107,11 @@ CameraControllerPrivate::init()
 	m_logicalDevice->addAxis( m_rxAxis );
 	m_logicalDevice->addAxis( m_tzAxis );
 
-	QObject::connect( m_frameAction.data(), &Qt3DLogic::QFrameAction::triggered,
+	QObject::connect( m_frameAction.get(), &Qt3DLogic::QFrameAction::triggered,
 		q, &CameraController::_q_onTriggered );
 
-	q->addComponent( m_frameAction.take() );
-	q->addComponent( m_logicalDevice.take() );
+	q->addComponent( m_frameAction.release() );
+	q->addComponent( m_logicalDevice.release() );
 }
 
 

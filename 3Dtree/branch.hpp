@@ -25,7 +25,9 @@
 
 // Qt include.
 #include <Qt3DCore/QEntity>
-#include <QScopedPointer>
+
+// C++ include.
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 
@@ -108,7 +110,7 @@ private:
 
 	Q_DISABLE_COPY( Branch )
 
-	QScopedPointer< BranchPrivate > d;
+	std::unique_ptr< BranchPrivate > d;
 }; // class Branch
 
 #endif // TREE__BRANCH_HPP__INCLUDED

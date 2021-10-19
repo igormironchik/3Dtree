@@ -25,7 +25,9 @@
 
 // Qt include.
 #include <Qt3DCore/QEntity>
-#include <QScopedPointer>
+
+// C++ include.
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 
@@ -60,7 +62,7 @@ private:
 
 	Q_DISABLE_COPY( CameraController )
 
-	QScopedPointer< CameraControllerPrivate > d;
+	std::unique_ptr< CameraControllerPrivate > d;
 }; // class CameraController
 
 #endif // TREE__CAMERA_CONTROLLER_HPP__INCLUDED

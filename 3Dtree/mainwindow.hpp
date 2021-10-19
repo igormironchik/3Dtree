@@ -25,7 +25,8 @@
 
 // Qt include.
 #include <QWidget>
-#include <QScopedPointer>
+
+// C++ include.
 
 QT_BEGIN_NAMESPACE
 
@@ -47,7 +48,7 @@ class MainWindow Q_DECL_FINAL
 	:	public QWidget
 {
 public:
-	explicit MainWindow( QScopedPointer< Qt3DExtras::Qt3DWindow > & view );
+	explicit MainWindow( std::unique_ptr< Qt3DExtras::Qt3DWindow > & view );
 	~MainWindow();
 
 private slots:
@@ -67,7 +68,7 @@ private:
 
 	Q_DISABLE_COPY( MainWindow )
 
-	QScopedPointer< MainWindowPrivate > d;
+	std::unique_ptr< MainWindowPrivate > d;
 }; // class MainWindow
 
 

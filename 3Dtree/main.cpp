@@ -32,7 +32,7 @@ int main( int argc, char ** argv )
 {
 	QApplication app( argc, argv );
 
-	QScopedPointer< Qt3DExtras::Qt3DWindow > view( new Qt3DExtras::Qt3DWindow );
+	auto view = std::make_unique< Qt3DExtras::Qt3DWindow > ();
 
 	MainWindow w( view );
 

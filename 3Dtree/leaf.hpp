@@ -25,7 +25,6 @@
 
 // Qt include.
 #include <Qt3DCore/QEntity>
-#include <QScopedPointer>
 
 QT_BEGIN_NAMESPACE
 
@@ -95,7 +94,7 @@ private:
 
 	Q_DISABLE_COPY( Leaf )
 
-	QScopedPointer< LeafPrivate > d;
+	std::unique_ptr< LeafPrivate > d;
 }; // class Leaf
 
 #endif // TREE__LEAF_HPP__INCLUDED

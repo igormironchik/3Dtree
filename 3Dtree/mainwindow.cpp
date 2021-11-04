@@ -100,7 +100,7 @@ public:
 	}
 
 	//! Init.
-	void init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view );
+	void init( std::unique_ptr< Qt3DExtras::Qt3DWindow > & view );
 	//! Init 3D.
 	void init3D( Qt3DExtras::Qt3DWindow * view );
 	//! Create tree.
@@ -175,11 +175,11 @@ public:
 }; // class MainWindowPrivate
 
 void
-MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
+MainWindowPrivate::init( std::unique_ptr< Qt3DExtras::Qt3DWindow > & view )
 {
-	QWidget * container = QWidget::createWindowContainer( view.data(), q );
+	QWidget * container = QWidget::createWindowContainer( view.get(), q );
 
-	Qt3DExtras::Qt3DWindow * window = view.take();
+	Qt3DExtras::Qt3DWindow * window = view.release();
 
 	container->setMinimumSize( QSize( 768, 600 ) );
 	container->setMaximumSize( QSize( 768, 600 ) );
@@ -259,18 +259,18 @@ MainWindowPrivate::init( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
 void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 {
 	// Root entity
-	QScopedPointer< Qt3DCore::QEntity > root( new Qt3DCore::QEntity );
+	auto root = std::make_unique< Qt3DCore::QEntity > ();
 
-	QScopedPointer< Qt3DLogic::QFrameAction > frameAction( new Qt3DLogic::QFrameAction );
+	auto frameAction = std::make_unique< Qt3DLogic::QFrameAction > ();
 
-	QObject::connect( frameAction.data(), &Qt3DLogic::QFrameAction::triggered,
+	QObject::connect( frameAction.get(), &Qt3DLogic::QFrameAction::triggered,
 		q, &MainWindow::frameProcessed );
 
-	root->addComponent( frameAction.take() );
+	root->addComponent( frameAction.release() );
 
-	m_branchMaterial = new Qt3DExtras::QPhongMaterial( root.data() );
+	m_branchMaterial = new Qt3DExtras::QPhongMaterial( root.get() );
 
-	m_leafMesh = new Qt3DRender::QMesh( root.data() );
+	m_leafMesh = new Qt3DRender::QMesh( root.get() );
 	m_leafMesh->setSource( QUrl( "qrc:/res/leaf.obj" ) );
 
 	m_branchMaterial->setDiffuse( QColor( 41, 19, 0 ) );
@@ -287,7 +287,7 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	cameraEntity->rotateAboutViewCenter(
 		Qt3DCore::QTransform::fromAxisAndAngle( 0.0f, 1.0f, 0.0f, 45.0f ) );
 
-	m_lightEntity = new Qt3DCore::QEntity( root.data() );
+	m_lightEntity = new Qt3DCore::QEntity( root.get() );
 
 	m_light = new Qt3DRender::QPointLight( m_lightEntity );
 	m_light->setColor( Qt::white );
@@ -299,9 +299,9 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	m_lightTransform->setTranslation( cameraEntity->position() );
 	m_lightEntity->addComponent( m_lightTransform );
 
-	m_control = new CameraController( cameraEntity, root.data() );
+	m_control = new CameraController( cameraEntity, root.get() );
 
-	m_skyBox = new Qt3DExtras::QSkyboxEntity( root.data() );
+	m_skyBox = new Qt3DExtras::QSkyboxEntity( root.get() );
 	m_skyBox->setBaseName( QStringLiteral( "qrc:/res/skybox" ) );
 	m_skyBox->setExtension( QStringLiteral( ".tga" ) );
 
@@ -312,9 +312,9 @@ void MainWindowPrivate::init3D( Qt3DExtras::Qt3DWindow * view )
 	skyTransform->setScale3D( QVector3D( baseScale, baseScale / 4.0f, baseScale ) );
 	m_skyBox->addComponent( skyTransform );
 
-	m_rootEntity = root.data();
+	m_rootEntity = root.get();
 
-	view->setRootEntity( root.take() );
+	view->setRootEntity( root.release() );
 }
 
 void
@@ -358,7 +358,7 @@ MainWindowPrivate::deleteTree()
 // MainWindow
 //
 
-MainWindow::MainWindow( QScopedPointer< Qt3DExtras::Qt3DWindow > & view )
+MainWindow::MainWindow( std::unique_ptr< Qt3DExtras::Qt3DWindow > & view )
 	:	d( new MainWindowPrivate( this ) )
 {
 	d->init( view );

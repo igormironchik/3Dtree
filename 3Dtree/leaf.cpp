@@ -39,6 +39,7 @@
 // C++ include.
 #include <cmath>
 #include <random>
+#include <memory>
 
 
 using namespace Qt3DExtras;
@@ -119,21 +120,21 @@ LeafPrivate::init()
 {
 	q->addComponent( m_mesh );
 
-	QScopedPointer< QPhongMaterial > material( new QPhongMaterial );
+	auto material = std::make_unique< QPhongMaterial > ();
 
 	material->setDiffuse( Qt::darkGreen );
 
-	m_material = material.data();
+	m_material = material.get();
 
-	q->addComponent( material.take() );
+	q->addComponent( material.release() );
 
-	QScopedPointer< Qt3DCore::QTransform > transform( new Qt3DCore::QTransform );
+	auto transform = std::make_unique< Qt3DCore::QTransform > ();
 
 	transform->setTranslation( *m_endBranchPos );
 
-	m_transform = transform.data();
+	m_transform = transform.get();
 
-	q->addComponent( transform.take() );
+	q->addComponent( transform.release() );
 
 	std::random_device rd;
 	std::mt19937 gen( rd() );
